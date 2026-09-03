@@ -1,0 +1,1562 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signet — N2SF 문서 라벨 시연</title>
+<style>
+:root{
+  --bg:#F7F8F6; --panel:#FFFFFF; --ink:#1F2A33; --ink-soft:#5A6670;
+  --o:#0E7C66; --s:#C97B1B; --c:#B3362B; --u:#8A9199;
+  --pass:#0E7C66; --block:#B3362B;
+  --line:#E2E5E0; --line-strong:#C8CDC6;
+  --o-bg:#EAF4F1; --s-bg:#F9F0E3; --c-bg:#F8ECEA; --u-bg:#F0F1F2;
+  --focus:#2B6CB0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Pretendard Variable","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  font-size:14px; line-height:1.55;
+}
+.mono{font-family:ui-monospace,Consolas,"D2Coding",monospace; font-size:12px}
+button{font-family:inherit; cursor:pointer}
+h1,h2,h3{margin:0; font-weight:700}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:8px}
+.panel>.panel-head{
+  padding:10px 14px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:8px; justify-content:space-between;
+}
+.panel-title{font-size:13px; font-weight:700; letter-spacing:.01em}
+.panel-title .brand{color:var(--ink-soft); font-weight:600}
+.panel-body{padding:12px 14px}
+
+/* ── 헤더 ─────────────────────────────── */
+header.app{
+  background:var(--panel); border-bottom:1px solid var(--line);
+  padding:10px 20px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+}
+.logo{display:flex; align-items:baseline; gap:10px}
+.logo .name{font-size:19px; font-weight:800; letter-spacing:.02em}
+.logo .sub{font-size:13px; color:var(--ink-soft)}
+.stage-tabs{display:flex; gap:6px; margin-left:auto}
+.stage-tab{
+  border:1px solid var(--line-strong); background:var(--bg); color:var(--ink-soft);
+  border-radius:4px; padding:7px 16px; font-size:13px; font-weight:700;
+}
+.stage-tab.active{background:var(--ink); border-color:var(--ink); color:#fff}
+
+/* ── 해설 밴드 ─────────────────────────── */
+#conceptBand{margin:12px 16px 0; border:1px solid var(--line); border-radius:8px; background:var(--panel)}
+#conceptBand .cb-head{display:flex; align-items:center; gap:10px; padding:8px 14px; cursor:pointer}
+#conceptBand .cb-title{font-size:13px; font-weight:700}
+#conceptBand .cb-sub{font-size:12px; color:var(--ink-soft)}
+#conceptBand .cb-toggle{margin-left:auto; border:none; background:none; color:var(--ink-soft); font-size:12px}
+#conceptBody{display:flex; gap:18px; padding:4px 16px 14px; align-items:center; border-top:1px dashed var(--line)}
+#conceptBody.hidden{display:none}
+#conceptBody svg{flex:0 0 auto}
+#conceptBody .cb-text{font-size:13px; max-width:760px}
+#conceptBody .cb-foot{font-size:11.5px; color:var(--ink-soft); margin-top:6px}
+
+/* ── 메인 3열 ─────────────────────────── */
+main{display:grid; grid-template-columns:minmax(280px,320px) minmax(380px,1fr) minmax(360px,430px); gap:12px; padding:12px 16px; align-items:start}
+@media (max-width:1180px){ main{grid-template-columns:260px 1fr 360px} }
+
+/* 조직 카드 */
+.org-card{border:1px solid var(--line); border-radius:6px; padding:8px 10px; margin-bottom:6px; background:#FCFCFB}
+.org-card .org-name{font-weight:700; font-size:13px; display:flex; gap:6px; align-items:center}
+.org-card .org-role{font-size:11.5px; color:var(--ink-soft)}
+.org-card .org-fp{margin-top:2px; color:var(--ink-soft)}
+.badge{display:inline-block; font-size:10.5px; font-weight:700; border-radius:3px; padding:1px 6px; vertical-align:1px}
+.badge.anchor{background:#EEF1F4; color:#40566B; border:1px solid #C9D4DE}
+.badge.pact-ok{background:var(--o-bg); color:var(--o); border:1px solid #BBDCD3}
+.badge.pact-no{background:var(--c-bg); color:var(--c); border:1px solid #E4C4BF}
+.org-card.root{padding:5px 10px}
+.org-card.root .org-role{display:inline}
+
+/* 폴더 & 파일 카드 */
+.folder{border:1px solid var(--line-strong); border-radius:8px; margin-bottom:10px; background:#FBFBFA}
+.folder>.folder-head{padding:7px 12px; font-size:12.5px; font-weight:700; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; background:#F3F4F1; border-radius:8px 8px 0 0}
+.folder>.folder-head .count{font-weight:600; color:var(--ink-soft); font-size:11.5px}
+.folder-body{padding:8px; min-height:44px}
+.folder-empty{font-size:12px; color:var(--u); text-align:center; padding:10px 0}
+.file-card{
+  display:flex; gap:10px; align-items:center; padding:8px 10px; margin-bottom:6px;
+  background:var(--panel); border:1px solid var(--line); border-radius:6px; cursor:pointer;
+  position:relative;
+}
+.file-card:hover{border-color:var(--line-strong)}
+.file-card.selected{border-color:var(--ink); box-shadow:0 0 0 1px var(--ink)}
+.file-card .f-meta{flex:1; min-width:0}
+.file-card .f-name{font-weight:700; font-size:12.5px; word-break:break-all}
+.file-card .f-sub{font-size:11px; color:var(--ink-soft); display:flex; gap:6px; align-items:center; margin-top:1px}
+.fmt-chip{font-size:9.5px; font-weight:800; border:1px solid var(--line-strong); border-radius:3px; padding:0 4px; color:var(--ink-soft); letter-spacing:.04em}
+.blocked-tag{
+  display:inline-block; margin-top:4px; font-size:10.5px; font-weight:700;
+  color:var(--block); background:var(--c-bg); border:1px solid #E4C4BF; border-radius:3px; padding:1px 6px;
+}
+.move-btn{
+  border:1px solid var(--line-strong); background:var(--bg); border-radius:4px;
+  font-size:11px; font-weight:700; padding:4px 8px; white-space:nowrap; color:var(--ink);
+}
+.move-btn:hover{background:#EDEFEA}
+.move-btn:disabled{opacity:.45; cursor:default}
+
+/* ── 스탬프 (직인) ─────────────────────── */
+.stamp{
+  --sc:var(--u);
+  width:52px; height:52px; border-radius:50%; flex:0 0 auto;
+  border:2.5px solid var(--sc); color:var(--sc);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-weight:800; line-height:1.05; position:relative; background:#fff;
+  transform:rotate(-6deg);
+}
+.stamp .g{font-size:17px}
+.stamp .w{font-size:9px; font-weight:700}
+.stamp.g-O{--sc:var(--o)} .stamp.g-S{--sc:var(--s)} .stamp.g-C{--sc:var(--c)}
+.stamp.g-U{--sc:var(--u); border-style:dashed; transform:none; background:transparent}
+.stamp.g-U .w{font-size:9.5px}
+.stamp.foreign{box-shadow:0 0 0 2px #fff, 0 0 0 3.5px var(--sc)}
+.stamp .ribbon{
+  position:absolute; bottom:-9px; left:50%; transform:translateX(-50%) rotate(6deg);
+  font-size:8.5px; font-weight:700; background:var(--sc); color:#fff; border-radius:2px;
+  padding:0 5px; white-space:nowrap;
+}
+.stamp.cracked::after{
+  content:""; position:absolute; inset:-3px;
+  background:
+    linear-gradient(58deg, transparent 46.5%, var(--c) 46.5%, var(--c) 49%, transparent 49%, transparent 55.5%, var(--c) 55.5%, var(--c) 57.2%, transparent 57.2%);
+  border-radius:50%; pointer-events:none;
+}
+.stamp-wrap{position:relative; flex:0 0 auto; padding-bottom:6px}
+.stamp-warn{
+  position:absolute; top:-6px; right:-10px; font-size:9px; font-weight:800;
+  background:var(--c); color:#fff; border-radius:3px; padding:0 4px; transform:rotate(6deg);
+  white-space:nowrap;
+}
+.stamp-sm{
+  --sc:var(--u); display:inline-flex; align-items:center; justify-content:center;
+  width:22px; height:22px; border-radius:50%; border:2px solid var(--sc); color:var(--sc);
+  font-size:11px; font-weight:800; background:#fff; vertical-align:middle;
+}
+.stamp-sm.g-O{--sc:var(--o)} .stamp-sm.g-S{--sc:var(--s)} .stamp-sm.g-C{--sc:var(--c)}
+.stamp-sm.word{width:auto; border-radius:11px; padding:0 7px; font-size:10px}
+
+/* ── X-ray 뷰 ─────────────────────────── */
+#xrayHead{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+#xrayHead .xf-name{font-weight:800; font-size:14px}
+.xtree{
+  background:#FBFBFA; border:1px solid var(--line); border-radius:6px;
+  padding:10px 12px; margin-top:10px; font-family:ui-monospace,Consolas,monospace; font-size:12px;
+}
+.xtree .xt-root{font-weight:700; margin-bottom:4px; font-family:inherit}
+.xtree .xt-node{padding:2px 4px; border-radius:3px; white-space:pre}
+.xtree .xt-node.body{cursor:pointer; color:#1D4ED8}
+.xtree .xt-node.body:hover{background:#EEF2FA}
+.xtree .xt-node.labelnode{
+  cursor:pointer; font-weight:700; background:var(--o-bg); border:1px dashed #9CC8BC;
+  margin-top:2px; display:inline-block;
+}
+.xtree .xt-node.labelnode.bad{background:var(--c-bg); border-color:#DBA8A1}
+.xtree .xt-node.labelnode.sprout{animation:sprout .5s ease-out}
+.xtree .xt-node.labelnode.tearing{animation:tear .55s ease-in forwards}
+@keyframes sprout{from{transform:scale(.6); opacity:0} to{transform:scale(1); opacity:1}}
+@keyframes tear{
+  30%{transform:rotate(-3deg) translateX(2px)}
+  60%{transform:rotate(5deg) translateX(-6px); opacity:.8}
+  100%{transform:rotate(14deg) translate(28px,14px); opacity:0}
+}
+.label-card{
+  border:1px solid var(--line-strong); border-radius:8px; margin-top:10px; overflow:hidden;
+}
+.label-card .lc-head{display:flex; align-items:center; gap:14px; padding:12px 14px; background:#FCFCFB; border-bottom:1px solid var(--line)}
+.label-card table{width:100%; border-collapse:collapse; font-size:12px}
+.label-card td{padding:5px 14px; border-top:1px solid var(--line); vertical-align:top}
+.label-card td.k{width:96px; color:var(--ink-soft); font-weight:600; white-space:nowrap}
+.sig-ind{font-weight:800; font-size:12.5px; border-radius:4px; padding:2px 8px; display:inline-block}
+.sig-ind.ok{color:var(--o); background:var(--o-bg)}
+.sig-ind.bad{color:var(--c); background:var(--c-bg)}
+.sig-ind.none{color:var(--u); background:var(--u-bg)}
+.content-box{margin-top:10px}
+.content-box .cb-bar{display:flex; align-items:center; gap:8px; margin-bottom:4px}
+.content-box .cb-bar b{font-size:12.5px}
+.content-lines{
+  border:1px solid var(--line); border-radius:6px; padding:8px 10px; background:#fff;
+  font-size:12.5px; white-space:pre-wrap; word-break:break-all; max-height:180px; overflow:auto;
+}
+.content-lines .tampered{background:#FBE3E0; color:var(--c); font-weight:700; border-radius:2px}
+textarea.content-edit{
+  width:100%; min-height:140px; border:1px solid var(--focus); border-radius:6px; padding:8px 10px;
+  font:inherit; font-size:12.5px; resize:vertical;
+}
+.tamper-bar{margin-top:12px; display:flex; gap:6px; flex-wrap:wrap}
+.tamper-bar .tb-label{font-size:11.5px; font-weight:700; color:var(--ink-soft); width:100%}
+.tamper-btn{
+  border:1px solid #DBA8A1; color:var(--c); background:#FDF7F6; border-radius:4px;
+  font-size:12px; font-weight:700; padding:5px 10px;
+}
+.tamper-btn:hover{background:var(--c-bg)}
+.tamper-btn:disabled{opacity:.4; cursor:default}
+.small-btn{
+  border:1px solid var(--line-strong); background:var(--bg); border-radius:4px;
+  font-size:11px; padding:3px 8px; color:var(--ink);
+}
+
+/* 발급 폼 */
+#issueForm{border:1px solid #BBDCD3; background:#FBFDFC; border-radius:8px; margin-top:12px; padding:12px 14px}
+#issueForm h3{font-size:13px; color:var(--o)}
+#issueForm .if-note{font-size:11.5px; color:var(--ink-soft); margin:4px 0 10px}
+#issueForm .if-row{display:flex; gap:8px; margin-bottom:8px; align-items:center; flex-wrap:wrap}
+#issueForm label{font-size:12px; font-weight:700; width:52px}
+#issueForm select,#issueForm input{
+  font:inherit; font-size:12.5px; padding:5px 8px; border:1px solid var(--line-strong); border-radius:4px; background:#fff;
+}
+#issueForm select{max-width:100%}
+#issueForm .approve-note{font-size:11.5px; color:var(--s); font-weight:700; display:none}
+#issueForm.o-grade .approve-note{display:block}
+#issueForm.o-grade #ifApprover{border-color:var(--s); box-shadow:0 0 0 2px #F3E3CB}
+#issueBtn{
+  background:var(--o); color:#fff; border:none; border-radius:4px; font-size:13px; font-weight:800;
+  padding:8px 18px;
+}
+#issueBtn:disabled{opacity:.5}
+
+/* ── 게이트 패널 ───────────────────────── */
+.route{display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:var(--ink-soft); flex-wrap:wrap; margin-bottom:10px}
+.route .rt{background:#F3F4F1; border:1px solid var(--line); border-radius:4px; padding:3px 8px}
+.route .rt.gatept{background:var(--ink); color:#fff; border-color:var(--ink)}
+.route .arr{color:var(--u)}
+#gateStage{
+  height:64px; border:1px dashed var(--line-strong); border-radius:8px; margin-bottom:10px;
+  display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;
+  background:repeating-linear-gradient(90deg,#FBFBFA 0 14px,#F5F6F3 14px 28px);
+}
+#gateStage .idle-hint{font-size:11.5px; color:var(--u)}
+.gate-chip{
+  display:flex; gap:8px; align-items:center; background:#fff; border:1px solid var(--line-strong);
+  border-radius:6px; padding:5px 10px; font-size:12px; font-weight:700;
+  box-shadow:0 2px 8px rgba(31,42,51,.14);
+}
+.gate-chip .stamp-sm{transform:rotate(-6deg)}
+.gate-chip.arrive{animation:chipArrive .55s ease-out}
+.gate-chip.hold{animation:chipHold 1.1s ease-in-out infinite}
+.gate-chip.pass-out{animation:chipPass .7s ease-in forwards}
+.gate-chip.block-back{animation:chipBlock .7s ease-in forwards}
+@keyframes chipArrive{from{transform:translateX(-180px); opacity:0} to{transform:none; opacity:1}}
+@keyframes chipHold{0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)}}
+@keyframes chipPass{to{transform:translateX(240px); opacity:0}}
+@keyframes chipBlock{20%{transform:translateX(8px)} to{transform:translateX(-240px); opacity:0}}
+#gateLog{
+  border:1px solid var(--line); border-radius:8px; background:#FCFCFB;
+  min-height:150px; max-height:290px; overflow-y:auto; padding:8px 10px;
+  font-family:ui-monospace,Consolas,monospace; font-size:11.8px; line-height:1.7;
+}
+#gateLog .gl{white-space:pre-wrap; word-break:break-all; animation:fadein .25s ease-out}
+#gateLog .gl .st{display:inline-block; min-width:46px; color:var(--ink-soft); font-weight:700}
+#gateLog .gl.ok .msg{color:#155E4E}
+#gateLog .gl.fail .msg{color:var(--c); font-weight:700}
+#gateLog .gl.info .msg{color:#40566B}
+#gateLog .gl.verdict{margin-top:6px; font-size:13px; font-weight:800; border-radius:5px; padding:4px 8px}
+#gateLog .gl.verdict.pass{background:var(--o-bg); color:var(--pass); box-shadow:0 2px 8px rgba(14,124,102,.2)}
+#gateLog .gl.verdict.block{background:var(--c-bg); color:var(--block); box-shadow:0 2px 8px rgba(179,54,43,.2)}
+#gateLog .empty{color:var(--u); font-family:inherit; font-size:12px}
+@keyframes fadein{from{opacity:0; transform:translateY(3px)} to{opacity:1; transform:none}}
+#conclusionCard{
+  margin-top:10px; border:1px solid var(--line-strong); border-left:4px solid var(--ink);
+  border-radius:6px; padding:9px 12px; font-size:12.5px; background:#FCFCFB; display:none;
+}
+#conclusionCard b{display:block; font-size:11px; color:var(--ink-soft); margin-bottom:2px}
+
+/* ── 레지스트리 ───────────────────────── */
+#panelRegistry{margin:0 16px}
+.reg-tabs{display:flex; gap:4px}
+.reg-tab{
+  border:1px solid var(--line-strong); background:var(--bg); border-radius:4px 4px 0 0;
+  font-size:12px; font-weight:700; padding:5px 12px; color:var(--ink-soft); position:relative;
+}
+.reg-tab.active{background:#fff; color:var(--ink); border-bottom-color:#fff}
+.reg-tab .dot{position:absolute; top:3px; right:4px; width:7px; height:7px; border-radius:50%; background:var(--s); display:none}
+.reg-tab.has-dot .dot{display:block}
+.reg-badge{
+  font-size:11.5px; font-weight:700; color:var(--o); background:var(--o-bg);
+  border:1px solid #BBDCD3; border-radius:4px; padding:2px 8px; cursor:help;
+}
+.reg-badge.bad{color:var(--c); background:var(--c-bg); border-color:#E4C4BF}
+.reg-banner{
+  font-size:12px; color:var(--ink-soft); background:var(--u-bg); border:1px solid var(--line-strong);
+  border-radius:4px; padding:4px 10px; margin-bottom:6px;
+}
+.reg-table-wrap{overflow-x:auto}
+table.reg{width:100%; border-collapse:collapse; font-size:12px}
+table.reg th{
+  text-align:left; font-size:11px; color:var(--ink-soft); font-weight:700;
+  border-bottom:1.5px solid var(--line-strong); padding:5px 8px; white-space:nowrap;
+}
+table.reg td{border-bottom:1px solid var(--line); padding:5px 8px; vertical-align:middle}
+table.reg tr.pulse>td{animation:rowPulse 1.2s ease-out 2}
+table.reg tr.row-new>td{animation:rowNew 1.6s ease-out}
+@keyframes rowPulse{0%{background:#FFF3CD} 100%{background:transparent}}
+@keyframes rowNew{0%{background:var(--o-bg)} 100%{background:transparent}}
+.lookup-marker{color:var(--s); font-weight:800; font-size:11px; margin-left:6px}
+
+/* ── 시나리오 바 ───────────────────────── */
+#scenarioBar{
+  margin:12px 16px; padding:10px 14px; background:var(--panel); border:1px solid var(--line);
+  border-radius:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+}
+#scenarioBar .sb-label{font-size:12px; font-weight:800; color:var(--ink-soft); margin-right:4px}
+.scn-btn{
+  border:1px solid var(--line-strong); background:var(--bg); border-radius:4px;
+  font-size:12px; font-weight:700; padding:6px 11px; color:var(--ink);
+}
+.scn-btn:hover{background:#EDEFEA}
+.scn-btn:disabled{opacity:.45; cursor:default}
+.scn-btn .stg{font-size:9.5px; color:var(--u); font-weight:800; margin-right:4px}
+#resetBtn{margin-left:auto; border-color:#DBA8A1; color:var(--c); background:#FDF7F6}
+
+footer.app{
+  margin:0 16px 20px; padding:12px 4px; color:var(--ink-soft); font-size:12px;
+  border-top:1px solid var(--line); display:flex; flex-direction:column; gap:4px;
+}
+footer.app .narrative{font-size:12.5px; color:var(--ink)}
+footer.app .narrative b{letter-spacing:.03em}
+
+.focus-ring{outline:3px solid var(--focus) !important; outline-offset:2px; border-radius:6px; transition:outline .2s}
+.hidden{display:none !important}
+#bootMsg{padding:60px; text-align:center; color:var(--ink-soft)}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important}
+}
+</style>
+</head>
+<body>
+
+<div id="bootMsg">기관 키쌍 생성 및 초기 라벨 서명 중… (WebCrypto)</div>
+
+<div id="app" class="hidden">
+<header class="app">
+  <div class="logo">
+    <span class="name">Signet</span>
+    <span class="sub">N2SF 문서 라벨 시연 — 티켓과 여권</span>
+  </div>
+  <div class="stage-tabs">
+    <button class="stage-tab" id="tabStage1" onclick="switchStage(1)">Stage 1 · 티켓 (조직 내 게이트)</button>
+    <button class="stage-tab" id="tabStage2" onclick="switchStage(2)">Stage 2 · 여권 (기관 간 상호 인정)</button>
+  </div>
+</header>
+
+<section id="conceptBand">
+  <div class="cb-head" onclick="toggleConcept()">
+    <span class="cb-title" id="cbTitle"></span>
+    <span class="cb-sub" id="cbSub"></span>
+    <button class="cb-toggle" id="cbToggle">접기 ▲</button>
+  </div>
+  <div id="conceptBody"></div>
+</section>
+
+<main>
+  <!-- ① 조직 / 파일 -->
+  <section class="panel" id="panelOrgs">
+    <div class="panel-head"><span class="panel-title">조직 · 파일</span></div>
+    <div class="panel-body">
+      <div id="orgCards"></div>
+      <div id="sourceFolders" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <!-- ② X-ray -->
+  <section class="panel" id="panelXray">
+    <div class="panel-head">
+      <span class="panel-title">파일 X-ray — 내부 구조 · 라벨</span>
+    </div>
+    <div class="panel-body" id="xrayBody"></div>
+  </section>
+
+  <!-- ③ 게이트 -->
+  <section class="panel" id="panelGate">
+    <div class="panel-head">
+      <span class="panel-title">Signet Gate <span class="brand">— 검증 관문</span></span>
+      <span id="gateVerifier" style="font-size:11px; font-weight:700; color:var(--ink-soft)"></span>
+    </div>
+    <div class="panel-body">
+      <div class="route" id="gateRoute"></div>
+      <div id="gateStage"><span class="idle-hint">파일을 선택하고 [관문 통과 시도]를 누르면 이 자리에서 심사가 진행됩니다</span></div>
+      <div id="gateLog"><div class="empty">에이전트 콘솔 — 판정 파이프라인 로그가 여기에 출력됩니다</div></div>
+      <div id="conclusionCard"></div>
+      <div id="destFolder" style="margin-top:12px"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ④ 레지스트리 -->
+<section class="panel" id="panelRegistry">
+  <div class="panel-head">
+    <span class="panel-title">Signet Ledger <span class="brand">— 레지스트리</span></span>
+    <div style="display:flex; gap:10px; align-items:center">
+      <span class="reg-badge" id="criteriaBadge">기준 레지스트리 검증 중…</span>
+      <div class="reg-tabs">
+        <button class="reg-tab" id="regTabInstance" onclick="regSwitch('instance', true)">인스턴스 레지스트리 <span class="dot"></span></button>
+        <button class="reg-tab" id="regTabCriteria" onclick="regSwitch('criteria', true)">분류기준 레지스트리 <span class="dot"></span></button>
+      </div>
+    </div>
+  </div>
+  <div class="panel-body">
+    <div id="regBanner" class="reg-banner hidden"></div>
+    <div class="reg-table-wrap" id="regTableWrap"></div>
+  </div>
+</section>
+
+<!-- ⑤ 시나리오 바 -->
+<section id="scenarioBar">
+  <span class="sb-label">자동 시연</span>
+  <button class="scn-btn" onclick="runScenario(1)"><span class="stg">S1</span>1. 정상 발급과 통과</button>
+  <button class="scn-btn" onclick="runScenario(2)"><span class="stg">S1</span>2. 라벨 위조 (S→O)</button>
+  <button class="scn-btn" onclick="runScenario(3)"><span class="stg">S1</span>3. 본문 변조</button>
+  <button class="scn-btn" onclick="runScenario(4)"><span class="stg">S1</span>4. 라벨 박리와 귀속</button>
+  <button class="scn-btn" onclick="runScenario(5)"><span class="stg">S2</span>5. 타 기관 라벨 인정</button>
+  <button class="scn-btn" onclick="runScenario(6)"><span class="stg">S2</span>6. 협약 미체결 거부</button>
+  <button class="scn-btn" id="resetBtn" onclick="resetAll()">처음으로 되돌리기</button>
+</section>
+
+<footer class="app">
+  <div class="narrative">“라벨은 스스로 문서를 지키지 않는다 — 인장이 라벨을 보증하고, 관문이 검증하며, 원장이 기억한다. 조직 안에서는 티켓, 조직 사이에서는 여권. <b>Signet.</b>”</div>
+  <div>본 화면은 보여주기 전용 프로토타입입니다. 모든 해시(SHA-256)·서명(ECDSA P-256)·체인 검증은 브라우저 WebCrypto 실연산이며, 페이지를 새로고침하면 키와 서명이 새로 생성됩니다.</div>
+  <div>※ 화면이 동작하지 않는 환경에서는 파일이 있는 폴더에서 <span class="mono">python -m http.server</span> 실행 후 <span class="mono">http://localhost:8000</span> 으로 접속하세요.</div>
+</footer>
+</div>
+
+<script>
+/*CORE-START*/
+'use strict';
+function createSignetCore(){
+  const te = new TextEncoder();
+  const subtle = crypto.subtle;
+  const EC  = { name:'ECDSA', namedCurve:'P-256' };
+  const SIG = { name:'ECDSA', hash:'SHA-256' };
+
+  function b64(bytes){ let s=''; for(let i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]); return btoa(s); }
+  function unb64(str){ const s=atob(str); const a=new Uint8Array(s.length); for(let i=0;i<s.length;i++) a[i]=s.charCodeAt(i); return a; }
+  async function sha256Hex(bytes){
+    const d = await subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(d)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  const shortHex = h => h ? h.slice(0,16) : '';
+
+  /* ── 정적 데이터 ── */
+  const ORG_DEFS = [
+    { id:'root',  name:'국가 루트 CA',      role:'루트 인증기관 (국정원·KISA 역할) — 신뢰 앵커' },
+    { id:'kpost', name:'우정사업본부',       role:'주 시연 조직 — 라벨 발급 · 게이트 운영' },
+    { id:'ndata', name:'국가데이터청',       role:'여권 시나리오 상대 기관 (가상)' },
+    { id:'kari',  name:'한국행정연구원',     role:'협약 미체결 기관 (가상)' },
+  ];
+
+  const EQUIVALENCE = {
+    kpost: {
+      ndata: { '공개':'O', '민감':'S', '기밀':'C' },
+      // kari 항목 없음 = 등가 협약 미체결
+    }
+  };
+
+  const CRITERIA = [
+    { id:'PRIV',  basis:'정보공개법 §9 제6호', desc:'개인정보(성명·주민번호 등)',        grade:'S', controls:['N2SF-IF-14','N2SF-DU-2'] },
+    { id:'BIZ',   basis:'정보공개법 §9 제7호', desc:'법인 영업상 비밀',                  grade:'S', controls:['N2SF-IF-14','N2SF-DA-4'] },
+    { id:'AUDIT', basis:'정보공개법 §9 제5호', desc:'감사·내부검토 정보',                grade:'S', controls:['N2SF-IF-14'] },
+    { id:'SAFE',  basis:'정보공개법 §9 제3호', desc:'국민 생명·신체 보호 지장 정보',     grade:'S', controls:['N2SF-IF-14'] },
+    { id:'LAW',   basis:'정보공개법 §9 제1호', desc:'법률상 비밀·비공개',                grade:'C', controls:['N2SF-IF-14','N2SF-EK-1'] },
+    { id:'SEC',   basis:'정보공개법 §9 제2호', desc:'국가안전보장·국방·외교 관련',       grade:'C', controls:['N2SF-IF-14','N2SF-EK-1'] },
+    { id:'TRIAL', basis:'정보공개법 §9 제4호', desc:'재판·수사 관련 정보',               grade:'C', controls:['N2SF-IF-14','N2SF-EK-1'] },
+    { id:'OPEN',  basis:'해당 없음',           desc:'공개 정보',                         grade:'O', controls:[] },
+  ];
+
+  const LABEL_PATHS = {
+    hwp:  'N2SFLabel 커스텀 스트림',
+    hwpx: 'META-INF/n2sf-label.xml',
+    docx: 'customXml/n2sfLabel.xml',
+    pdf:  'XMP 메타데이터 (n2sf: 네임스페이스)',
+  };
+
+  const FILE_DEFS = [
+    { id:'f1', name:'보도자료_우체국금융.hwp', format:'hwp', org:'kpost', location:'internal',
+      content:`우정사업본부 보도자료
+
+우체국 금융, 2026년 상반기 디지털 창구 이용률 41% 달성
+
+우정사업본부는 전국 우체국 금융 창구의 디지털 전환 성과를 발표했다.
+상반기 모바일 창구 이용 건수는 전년 대비 18% 증가했으며,
+고령층 대상 디지털 도우미 서비스는 122개 총괄국으로 확대되었다.
+
+문의: 우정사업본부 대변인실`,
+      init:null },
+    { id:'f2', name:'2026_사업계획_초안.hwpx', format:'hwpx', org:'kpost', location:'internal',
+      content:`2026년 주요 사업계획(초안) — 내부 검토용
+
+1. 우체국 금융 차세대 시스템 2단계 착수 (예산 조정 검토 중)
+2. 물류센터 자동화 시범국 선정 — 내부 감사 지적사항 반영 필요
+3. 조직 개편안: 본부 3개 과 통합 검토 (미확정, 대외 유출 금지)
+
+※ 본 문서는 내부 검토 중인 초안으로 확정 전 공개 불가`,
+      init:{ grade:'S', basisId:'AUDIT', approver:'김보라 사무관' } },
+    { id:'f3', name:'직원_연락망.docx', format:'docx', org:'kpost', location:'internal',
+      content:`직원 비상 연락망 (개인정보 포함 — 취급 주의)
+
+김민준 과장   900101-1******   010-24**-51**
+이서연 주무관  880305-2******   010-77**-30**
+박지훈 계장   760912-1******   010-19**-88**
+
+※ 개인정보보호법에 따라 목적 외 사용 금지`,
+      init:{ grade:'S', basisId:'PRIV', approver:'김보라 사무관' } },
+    { id:'f4', name:'공개_통계요약.pdf', format:'pdf', org:'kpost', location:'internal',
+      content:`우체국 이용 통계 요약 (공개)
+
+2026년 상반기 전국 우체국 창구 방문: 총 3,180만 건
+등기·소포 접수: 1,420만 건 (전년 대비 +6.2%)
+우체국 예금 신규 계좌: 87만 좌
+
+본 통계는 공공데이터포털에 공개된 자료입니다.`,
+      init:{ grade:'O', basisId:'OPEN', approver:'오주상 계장' } },
+    { id:'f5', name:'데이터개방_협조요청.hwpx', format:'hwpx', org:'ndata', location:'ndata-out',
+      content:`데이터 개방 협조 요청
+
+국가데이터청은 「공공데이터의 제공 및 이용 활성화에 관한 법률」에 따라
+우정사업본부의 물류 통계 데이터 개방 협조를 요청드립니다.
+
+요청 데이터: 권역별 소포 물동량 월별 집계(비식별)
+회신 기한: 2026. 9. 30.`,
+      init:{ grade:'공개', basisId:'OPEN', approver:'정한결 주무관' } },
+    { id:'f6', name:'연구용역_중간보고.pdf', format:'pdf', org:'kari', location:'kari-out',
+      content:`연구용역 중간보고 — 공공기관 문서유통 체계 개선 연구
+
+제2장 현황 분석:
+기관 간 문서 유통 시 보안등급 표기가 상이하여
+수신 기관이 등급을 해석하지 못하는 사례가 다수 확인됨.
+
+한국행정연구원 문서정책연구실`,
+      init:{ grade:'일반', basisId:'OPEN', approver:'문서정책연구실장' } },
+  ];
+
+  const state = {
+    orgs:{}, files:[], registry:[],
+    criteriaSig:null, criteriaValid:false, criteriaVerifiedAt:null,
+    actionSeq:0,
+  };
+
+  const criteriaFor = id => CRITERIA.find(c=>c.id===id) || null;
+  const orgName = id => (state.orgs[id]||{}).name || id;
+  const fileById = id => state.files.find(f=>f.id===id);
+
+  /* ── 간이 인증서 ── */
+  function certBytes(subject, jwk){ return te.encode(subject + '\n' + JSON.stringify(jwk)); }
+
+  async function initOrgs(){
+    for(const def of ORG_DEFS){
+      const keyPair = await subtle.generateKey(EC, true, ['sign','verify']);
+      const jwk = await subtle.exportKey('jwk', keyPair.publicKey);
+      const fp = shortHex(await sha256Hex(te.encode(JSON.stringify(jwk))));
+      state.orgs[def.id] = { ...def, keyPair, publicKey:keyPair.publicKey, privateKey:keyPair.privateKey, jwk, fp, cert:null };
+    }
+    const root = state.orgs.root;
+    for(const id of ['kpost','ndata','kari']){
+      const o = state.orgs[id];
+      const sig = await subtle.sign(SIG, root.privateKey, certBytes(o.id, o.jwk));
+      o.cert = { subject:o.id, subjectName:o.name, publicKeyJwk:o.jwk, issuer:'root', signature:b64(new Uint8Array(sig)) };
+    }
+  }
+
+  async function verifyChain(cert){
+    return subtle.verify(SIG, state.orgs.root.publicKey, unb64(cert.signature), certBytes(cert.subject, cert.publicKeyJwk));
+  }
+
+  async function verifyWithCert(cert, sigB64, bytes){
+    const pub = await subtle.importKey('jwk', cert.publicKeyJwk, EC, true, ['verify']);
+    return subtle.verify(SIG, pub, unb64(sigB64), bytes);
+  }
+
+  /* ── 기준 레지스트리 서명 ── */
+  async function initCriteriaSig(){
+    const bytes = te.encode(JSON.stringify(CRITERIA));
+    const sig = await subtle.sign(SIG, state.orgs.root.privateKey, bytes);
+    state.criteriaSig = b64(new Uint8Array(sig));
+    state.criteriaValid = await subtle.verify(SIG, state.orgs.root.publicKey, unb64(state.criteriaSig), bytes);
+    state.criteriaVerifiedAt = new Date().toISOString();
+  }
+
+  /* ── 라벨 ── */
+  function canonicalizeLabel(l){
+    return [l.grade, l.basisId, l.issuerOrg, l.approver, l.actionId, l.issuedAt, l.contentHash].join('\n');
+  }
+
+  async function issueLabel(file, grade, basisId, approver){
+    const contentHash = await sha256Hex(file.contentBytes);
+    state.actionSeq++;
+    const actionId = 'ACT-2026-' + String(state.actionSeq).padStart(4,'0');
+    const label = {
+      grade, gradeDisplay:grade, basisId,
+      issuerOrg:file.org, approver, actionId,
+      issuedAt:new Date().toISOString(), contentHash, signature:null,
+    };
+    label.signature = await signAs(file.org, te.encode(canonicalizeLabel(label)));
+    file.label = label;
+    file.strippedLabel = null;
+    const crit = criteriaFor(basisId);
+    const row = {
+      hash:contentHash, fileName:file.name, grade, basisId,
+      basisText: crit ? crit.basis : '-', issuerOrg:file.org, approver, actionId, time:label.issuedAt,
+    };
+    state.registry.unshift(row);
+    await updateSigState(file);
+    return { label, row };
+  }
+
+  async function signAs(orgId, bytes){
+    const sig = await subtle.sign(SIG, state.orgs[orgId].privateKey, bytes);
+    return b64(new Uint8Array(sig));
+  }
+
+  async function updateSigState(file){
+    if(!file.label){ file.sigState='none'; file.sigDetail=null; return; }
+    const issuer = state.orgs[file.label.issuerOrg];
+    const sigOk = await verifyWithCert(issuer.cert, file.label.signature, te.encode(canonicalizeLabel(file.label)));
+    const hashOk = (await sha256Hex(file.contentBytes)) === file.label.contentHash;
+    file.sigState = (sigOk && hashOk) ? 'valid' : 'invalid';
+    file.sigDetail = { sigOk, hashOk };
+  }
+
+  function setContent(file, text){
+    file.contentText = text;
+    file.contentBytes = te.encode(text);
+  }
+
+  function tamperGrade(file){
+    if(!file.label) return;
+    file.label.grade = 'O';
+    file.label.gradeDisplay = 'O';
+  }
+
+  function tamperContent(file){
+    const line = '김하늘 주무관  910203-2******  010-55**-12**   ← 무단 삽입된 개인정보';
+    setContent(file, file.contentText + '\n' + line);
+    file.tamperLines = file.tamperLines || [];
+    file.tamperLines.push(file.contentText.split('\n').length - 1);
+  }
+
+  function stripLabel(file){
+    if(!file.label) return;
+    file.strippedLabel = file.label;
+    file.label = null;
+  }
+
+  const registryLookup = hash => state.registry.find(r=>r.hash===hash) || null;
+
+  /* ── 파일 초기화 ── */
+  async function initFiles(){
+    state.registry = [];
+    state.actionSeq = 0;
+    state.files = [];
+    for(const def of FILE_DEFS){
+      const f = makeFile(def);
+      state.files.push(f);
+      if(def.init) await issueLabel(f, def.init.grade, def.init.basisId, def.init.approver);
+      else await updateSigState(f);
+    }
+  }
+
+  function makeFile(def){
+    return {
+      id:def.id, name:def.name, format:def.format, org:def.org,
+      location:def.location, contentText:def.content, contentBytes:te.encode(def.content),
+      label:null, strippedLabel:null, sigState:'none', sigDetail:null,
+      tamperLines:[], blockedReason:null,
+    };
+  }
+
+  async function restoreFile(id){
+    const def = FILE_DEFS.find(d=>d.id===id);
+    const idx = state.files.findIndex(f=>f.id===id);
+    const f = makeFile(def);
+    state.files[idx] = f;
+    if(def.init) await issueLabel(f, def.init.grade, def.init.basisId, def.init.approver);
+    else await updateSigState(f);
+    return f;
+  }
+
+  /* ── 관문 검증 파이프라인 ── */
+  async function verifyAtGate(file, verifierId){
+    verifierId = verifierId || 'kpost';
+    const logs = [];
+    const verifier = state.orgs[verifierId];
+    const foreign = !!file.label && file.label.issuerOrg !== verifierId;
+    const curHash = await sha256Hex(file.contentBytes);
+    let fallbackRow = null;
+
+    function fallbackLookup(){
+      const row = registryLookup(curHash);
+      if(row){
+        fallbackRow = row;
+        logs.push({ step:'폴백', label:'인스턴스 레지스트리 조회', status:'info',
+          text:`해시 ${shortHex(curHash)}… → 원 분류: ${row.grade} (${row.basisText}, ${row.time.slice(0,10)}, 승인 ${row.approver})`,
+          ref:{ type:'registry', hash:row.hash } });
+      } else {
+        logs.push({ step:'폴백', label:'인스턴스 레지스트리 조회', status:'info',
+          text:`해시 ${shortHex(curHash)}… 이력 없음 — 발급 이력이 존재하지 않는 콘텐츠`,
+          ref:{ type:'registry-miss', hash:curHash } });
+      }
+    }
+
+    // [1/5] 라벨 추출
+    if(!file.label){
+      logs.push({ step:'1/5', label:'라벨 추출', status:'fail',
+        text: file.strippedLabel ? '라벨 없음 ✗ — 라벨 스트림이 제거된 파일 (미분류 U 취급)' : '라벨 없음 ✗ — 미분류(U) 파일' });
+      fallbackLookup();
+      logs.push({ step:'5/5', label:'게이트 정책', status:'fail', text:'미분류(U) 기본 차단 (default deny)' });
+      const reason = fallbackRow
+        ? `라벨 없음(U) 차단 — 레지스트리 귀속: 원 분류 ${fallbackRow.grade}`
+        : '라벨 없음(U) 기본 차단';
+      logs.push({ step:'▶', label:'판정', status:'verdict-block',
+        text:`차단 (BLOCK) — ${fallbackRow ? `라벨은 없으나 원 분류 ${fallbackRow.grade}로 귀속됨` : '미분류 문서는 경계를 넘을 수 없음'}` });
+      return { verdict:'BLOCK', reason, logs, fallbackRow };
+    }
+    logs.push({ step:'1/5', label:'라벨 추출', status:'ok', text:`발견 (${LABEL_PATHS[file.format]})` });
+
+    // [2/5] 체인 검증
+    const issuer = state.orgs[file.label.issuerOrg];
+    const chainOk = await verifyChain(issuer.cert);
+    logs.push({ step:'2/5', label:'발급기관 체인 검증', status: chainOk?'ok':'fail',
+      text: chainOk ? `${issuer.name} ← 국가 루트 CA ✓` : `${issuer.name} 인증서 체인 검증 실패 ✗` });
+    if(!chainOk){
+      logs.push({ step:'▶', label:'판정', status:'verdict-block', text:'차단 (BLOCK) — 발급기관 인증서를 신뢰할 수 없음' });
+      return { verdict:'BLOCK', reason:'인증서 체인 검증 실패', logs };
+    }
+
+    // [2/5 확장] 등가 협약 확인 (여권)
+    let eqMap = null;
+    if(foreign){
+      eqMap = (EQUIVALENCE[verifierId] || {})[issuer.id] || null;
+      if(!eqMap){
+        logs.push({ step:'2/5', label:'등가 협약 확인', status:'fail',
+          text:`체인은 유효하나 ${issuer.name}와(과) 등급 등가 협약 미체결 ✗ → 등급 해석 불가` });
+        logs.push({ step:'5/5', label:'게이트 정책', status:'fail', text:'등급 번역 불가 — 미분류(U) 취급 기본 차단' });
+        logs.push({ step:'▶', label:'판정', status:'verdict-block',
+          text:'차단 (BLOCK) — 협약 미체결: 서명이 진짜여도 등급을 상호 인정할 수 없음' });
+        return { verdict:'BLOCK', reason:'등가 협약 미체결 — U 취급 차단', logs };
+      }
+      logs.push({ step:'2/5', label:'등가 협약 확인', status:'ok',
+        text:`${verifier.name} ↔ ${issuer.name} 등급 등가 협약 체결 ✓` });
+    }
+
+    // [3/5] 서명·해시 검증
+    const sigOk = await verifyWithCert(issuer.cert, file.label.signature, te.encode(canonicalizeLabel(file.label)));
+    const hashOk = curHash === file.label.contentHash;
+    if(sigOk && hashOk){
+      logs.push({ step:'3/5', label:'서명·해시 검증', status:'ok', text:'라벨 서명 ✓ / 콘텐츠 해시 일치 ✓' });
+    } else {
+      logs.push({ step:'3/5', label:'서명·해시 검증', status:'fail',
+        text: !sigOk
+          ? '서명 불일치 ✗ (라벨 필드가 서명 이후 변경됨 — 라벨 위조 의심)'
+          : '라벨 서명 ✓ / 콘텐츠 해시 불일치 ✗ (본문이 발급 시점과 다름 — 본문 변조 또는 수정, 재분류 대상)' });
+      fallbackLookup();
+      logs.push({ step:'5/5', label:'게이트 정책', status:'fail', text:'검증 실패 파일 반출 불가' });
+      const reason = !sigOk
+        ? (fallbackRow ? `라벨 위조 의심 — 원 분류 ${fallbackRow.grade}로 귀속` : '라벨 위조 의심')
+        : '본문 변조 — 재분류 필요';
+      logs.push({ step:'▶', label:'판정', status:'verdict-block', text:`차단 (BLOCK) — ${reason}` });
+      return { verdict:'BLOCK', reason, logs, fallbackRow };
+    }
+
+    // [4/5] 등급 판정
+    const crit = criteriaFor(file.label.basisId);
+    let finalGrade;
+    if(!foreign){
+      finalGrade = file.label.grade;
+      logs.push({ step:'4/5', label:'등급 판정', status:'ok',
+        text:`${finalGrade} (근거: ${crit?crit.basis:'-'} · ${crit?crit.desc:'-'}) — 기준 레지스트리 대조 ✓`,
+        ref: crit ? { type:'criteria', id:crit.id } : undefined });
+    } else {
+      finalGrade = eqMap[file.label.grade];
+      if(!finalGrade){
+        logs.push({ step:'4/5', label:'등가 번역', status:'fail',
+          text:`'${file.label.grade}' 등급이 등가표에 없음 ✗ — 해석 불가` });
+        logs.push({ step:'▶', label:'판정', status:'verdict-block', text:'차단 (BLOCK) — 등가표 미등재 등급' });
+        return { verdict:'BLOCK', reason:'등가표 미등재 등급', logs };
+      }
+      logs.push({ step:'4/5', label:'등가 번역·등급 판정', status:'ok',
+        text:`${issuer.name} '${file.label.grade}' → ${verifier.name} '${finalGrade}' (등가 협약 §3) — 근거: ${crit?crit.basis:'-'} ✓`,
+        ref: crit ? { type:'criteria', id:crit.id } : undefined });
+    }
+
+    // [5/5] 게이트 정책
+    if(finalGrade === 'O'){
+      logs.push({ step:'5/5', label:'게이트 정책', status:'ok', text:'O등급 외부 반출 허용' });
+      logs.push({ step:'▶', label:'판정', status:'verdict-pass', text:'통과 (PASS)' });
+      return { verdict:'PASS', reason:null, logs, finalGrade };
+    }
+    logs.push({ step:'5/5', label:'게이트 정책', status:'fail', text:`${finalGrade}등급 외부 반출 불허 (허용 등급: O)` });
+    logs.push({ step:'▶', label:'판정', status:'verdict-block', text:`차단 (BLOCK) — ${finalGrade}등급은 경계를 넘을 수 없음` });
+    return { verdict:'BLOCK', reason:`${finalGrade}등급 반출 불가`, logs, finalGrade };
+  }
+
+  async function init(){
+    await initOrgs();
+    await initCriteriaSig();
+    await initFiles();
+  }
+
+  return {
+    state, CRITERIA, EQUIVALENCE, LABEL_PATHS, FILE_DEFS,
+    init, initFiles, restoreFile, fileById, criteriaFor, orgName,
+    issueLabel, verifyAtGate, updateSigState,
+    setContent, tamperGrade, tamperContent, stripLabel,
+    canonicalizeLabel, sha256Hex, shortHex, registryLookup, verifyChain,
+  };
+}
+if (typeof module !== 'undefined' && module.exports) module.exports = { createSignetCore };
+/*CORE-END*/
+</script>
+
+<script>
+/* ═══════════════ UI 계층 ═══════════════ */
+'use strict';
+const Core = createSignetCore();
+const S = Core.state;
+
+let stage = 1;
+let selectedId = null;
+let gateBusy = false;
+let scenarioBusy = false;
+let regTab = 'instance';
+let lastManualTab = 0;
+let editMode = false;
+
+const $ = sel => document.querySelector(sel);
+const sleep = ms => new Promise(r=>setTimeout(r, ms));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+const GRADE_WORD = { O:'공개', S:'민감', C:'기밀' };
+const GRADE_CLASS = { 'O':'g-O','S':'g-S','C':'g-C','공개':'g-O','민감':'g-S','기밀':'g-C','일반':'g-O' };
+
+/* ── 스탬프 ── */
+function stampHTML(file){
+  let inner, cls = 'stamp', warn = '';
+  if(!file.label){
+    cls += ' g-U';
+    inner = `<span class="w">라벨</span><span class="w">없음</span>`;
+    if(file.strippedLabel) warn = `<span class="stamp-warn">박리됨</span>`;
+  } else {
+    const g = file.label.grade;
+    cls += ' ' + (GRADE_CLASS[g] || 'g-U');
+    const foreign = file.label.issuerOrg !== 'kpost';
+    if(foreign) cls += ' foreign';
+    if(file.sigState === 'invalid'){
+      cls += ' cracked';
+      warn = `<span class="stamp-warn">${file.sigDetail && !file.sigDetail.sigOk ? '서명 불일치' : '해시 불일치'}</span>`;
+    }
+    inner = GRADE_WORD[g]
+      ? `<span class="g">${g}</span><span class="w">${GRADE_WORD[g]}</span>`
+      : `<span class="g" style="font-size:13px">${esc(g)}</span>`;
+    if(foreign) inner += `<span class="ribbon">${esc(Core.orgName(file.label.issuerOrg))}</span>`;
+  }
+  return `<span class="stamp-wrap"><span class="${cls}">${inner}</span>${warn}</span>`;
+}
+function stampSmHTML(grade){
+  const cls = GRADE_CLASS[grade] || '';
+  return GRADE_WORD[grade]
+    ? `<span class="stamp-sm ${cls}">${grade}</span>`
+    : `<span class="stamp-sm word ${cls}">${esc(grade)}</span>`;
+}
+
+/* ── ① 조직 카드 ── */
+function renderOrgs(){
+  const box = $('#orgCards');
+  const root = S.orgs.root;
+  let html = `
+    <div class="org-card root">
+      <div class="org-name">🏛 ${root.name} <span class="badge anchor">신뢰 앵커</span></div>
+      <div class="org-role">${root.role} · 지문 <span class="mono">${root.fp}</span></div>
+    </div>`;
+  for(const id of ['kpost','ndata','kari']){
+    const o = S.orgs[id];
+    const pact = id==='kpost'
+      ? `<span class="badge anchor">검증 주체</span>`
+      : (Core.EQUIVALENCE.kpost[id]
+          ? `<span class="badge pact-ok">우정사업본부와 등가 협약 ✓</span>`
+          : `<span class="badge pact-no">등가 협약 미체결 ✗</span>`);
+    html += `
+    <div class="org-card" id="org-${id}">
+      <div class="org-name">${o.name} ${pact}</div>
+      <div class="org-role">${o.role}</div>
+      <div class="org-fp mono">키 지문 ${o.fp} · 루트 체인 ○</div>
+    </div>`;
+  }
+  box.innerHTML = html;
+}
+
+/* ── 폴더 구성 ── */
+function sourceFolderDefs(){
+  return stage===1
+    ? [{ key:'internal', title:'📁 업무망 (우정사업본부 내부)' }]
+    : [{ key:'ndata-out', title:'📁 국가데이터청 반출함' }, { key:'kari-out', title:'📁 한국행정연구원 반출함' }];
+}
+function destFolderDef(){
+  return stage===1
+    ? { key:'external', title:'📁 외부 반출함 — 통과한 파일만' }
+    : { key:'kpost-in', title:'📁 우정사업본부 수신함 — 인정된 파일만' };
+}
+function destKeyFor(){ return destFolderDef().key; }
+
+function fileCardHTML(file, movable){
+  const sel = file.id===selectedId ? ' selected' : '';
+  const blocked = file.blockedReason
+    ? `<div class="blocked-tag">차단됨 · ${esc(file.blockedReason)}</div>` : '';
+  const btn = movable
+    ? `<button class="move-btn" ${gateBusy?'disabled':''} onclick="event.stopPropagation(); attemptMove('${file.id}')">관문 통과<br>시도 →</button>` : '';
+  return `
+  <div class="file-card${sel}" id="card-${file.id}" onclick="selectFile('${file.id}')">
+    ${stampHTML(file)}
+    <div class="f-meta">
+      <div class="f-name">${esc(file.name)}</div>
+      <div class="f-sub"><span class="fmt-chip">${file.format.toUpperCase()}</span> ${Core.orgName(file.org)}</div>
+      ${blocked}
+    </div>
+    ${btn}
+  </div>`;
+}
+
+function renderFolders(){
+  const src = $('#sourceFolders');
+  let html = '';
+  for(const fd of sourceFolderDefs()){
+    const files = S.files.filter(f=>f.location===fd.key);
+    html += `
+    <div class="folder">
+      <div class="folder-head"><span>${fd.title}</span><span class="count">${files.length}건</span></div>
+      <div class="folder-body">
+        ${files.length ? files.map(f=>fileCardHTML(f,true)).join('') : '<div class="folder-empty">비어 있음</div>'}
+      </div>
+    </div>`;
+  }
+  src.innerHTML = html;
+
+  const dd = destFolderDef();
+  const destFiles = S.files.filter(f=>f.location===dd.key);
+  $('#destFolder').innerHTML = `
+    <div class="folder">
+      <div class="folder-head"><span>${dd.title}</span><span class="count">${destFiles.length}건</span></div>
+      <div class="folder-body">
+        ${destFiles.length ? destFiles.map(f=>fileCardHTML(f,false)).join('') : '<div class="folder-empty">아직 통과한 파일이 없습니다</div>'}
+      </div>
+    </div>`;
+}
+
+/* ── ② X-ray ── */
+const XRAY_TREES = {
+  hwp: f => ({ root:`📦 ${f.name}  (HWP 5.x — CFB 복합문서)`, nodes:[
+    {t:'├─ FileHeader'}, {t:'├─ DocInfo'},
+    {t:'├─ BodyText/Section0', body:true, suffix:'  ← [본문]'},
+    {t: f.label?'├─ PrvText':'└─ PrvText'},
+    f.label ? {t:'└─ 🏷 N2SFLabel', labelnode:true, suffix:'  ← 커스텀 스트림'} : null,
+  ]}),
+  hwpx: f => ({ root:`📦 ${f.name}  (OWPML — ZIP+XML)`, nodes:[
+    {t:'├─ mimetype'},
+    {t:'├─ Contents/section0.xml', body:true, suffix:'  ← [본문]'},
+    {t: f.label?'├─ META-INF/manifest.xml':'└─ META-INF/manifest.xml'},
+    f.label ? {t:'└─ 🏷 META-INF/n2sf-label.xml', labelnode:true, suffix:'  ← 커스텀 파트'} : null,
+  ]}),
+  docx: f => ({ root:`📦 ${f.name}  (OOXML — ZIP+XML)`, nodes:[
+    {t:'├─ [Content_Types].xml'},
+    {t:'├─ word/document.xml', body:true, suffix:'  ← [본문]'},
+    {t: f.label?'├─ docProps/core.xml':'└─ docProps/core.xml'},
+    f.label ? {t:'└─ 🏷 customXml/n2sfLabel.xml', labelnode:true, suffix:'  ← 커스텀 파트'} : null,
+  ]}),
+  pdf: f => ({ root:`📦 ${f.name}  (PDF — 오브젝트 구조)`, nodes:[
+    {t:'├─ %PDF-1.7 헤더'},
+    {t:'├─ 1 0 obj  (Catalog)'},
+    {t:'├─ 4 0 obj  (Page/Contents)', body:true, suffix:'  ← [본문]'},
+    {t: f.label?'├─ xref 테이블':'└─ xref 테이블'},
+    f.label ? {t:'└─ 🏷 XMP 메타데이터 (n2sf: 네임스페이스)', labelnode:true} : null,
+  ]}),
+};
+
+function renderXray(){
+  const box = $('#xrayBody');
+  const f = Core.fileById(selectedId);
+  if(!f){ box.innerHTML = '<div style="color:var(--u); padding:30px 0; text-align:center">왼쪽 폴더에서 파일을 선택하세요</div>'; return; }
+
+  const tree = XRAY_TREES[f.format](f);
+  const nodesHTML = tree.nodes.filter(Boolean).map(n=>{
+    if(n.labelnode){
+      const bad = f.sigState==='invalid' ? ' bad' : '';
+      return `<div><span class="xt-node labelnode${bad}" id="labelNode" onclick="toggleLabelCard()">${esc(n.t)}</span><span style="color:var(--ink-soft)">${esc(n.suffix||'')}</span></div>`;
+    }
+    if(n.body) return `<div><span class="xt-node body" onclick="flashContent()">${esc(n.t)}</span><span style="color:var(--ink-soft)">${esc(n.suffix||'')}</span></div>`;
+    return `<div><span class="xt-node">${esc(n.t)}</span></div>`;
+  }).join('');
+
+  const strippedNote = (!f.label && f.strippedLabel)
+    ? `<div style="font-size:11.5px; color:var(--c); margin-top:4px">🏷 라벨 스트림이 제거되었습니다 (박리) — 원 라벨의 콘텐츠 해시는 레지스트리에 남아 있습니다</div>` : '';
+
+  box.innerHTML = `
+    <div id="xrayHead">
+      ${stampHTML(f)}
+      <div>
+        <div class="xf-name">${esc(f.name)}</div>
+        <div style="font-size:11.5px; color:var(--ink-soft)"><span class="fmt-chip">${f.format.toUpperCase()}</span> 소속: ${Core.orgName(f.org)} · 현재 콘텐츠 SHA-256 <span class="mono" id="curHash">계산 중…</span></div>
+      </div>
+    </div>
+    <div class="xtree"><div class="xt-root">${esc(tree.root)}</div>${nodesHTML}${strippedNote}</div>
+    <div id="labelCardBox">${f.label ? labelCardHTML(f) : ''}</div>
+    <div class="content-box" id="contentBox">
+      <div class="cb-bar">
+        <b>본문 미리보기</b>
+        <button class="small-btn" onclick="toggleEdit()">${editMode?'편집 완료':'직접 편집'}</button>
+        <span style="font-size:11px; color:var(--ink-soft)">본문 1글자만 바뀌어도 해시가 달라져 검증이 실패합니다</span>
+      </div>
+      ${editMode
+        ? `<textarea class="content-edit" id="contentEdit" oninput="onContentEdit()">${esc(f.contentText)}</textarea>`
+        : `<div class="content-lines">${contentLinesHTML(f)}</div>`}
+    </div>
+    <div class="tamper-bar">
+      <span class="tb-label">조작(tamper) — 실제 검증이 실패하는지 확인용</span>
+      <button class="tamper-btn" ${(!f.label || f.label.grade==='O')?'disabled':''} onclick="doTamperGrade()">등급 조작 (S→O 바꿔치기)</button>
+      <button class="tamper-btn" onclick="doTamperContent()">본문 변조 (개인정보 삽입)</button>
+      <button class="tamper-btn" ${!f.label?'disabled':''} onclick="doStrip()">라벨 박리 (스트림 삭제)</button>
+    </div>
+    ${issueFormHTML(f)}
+  `;
+  Core.sha256Hex(f.contentBytes).then(h=>{ const el=$('#curHash'); if(el) el.textContent = Core.shortHex(h)+'…'; });
+  refreshSigIndicator(f);
+}
+
+function contentLinesHTML(f){
+  const tampered = new Set(f.tamperLines||[]);
+  return f.contentText.split('\n').map((ln,i)=>
+    tampered.has(i) ? `<span class="tampered">${esc(ln)||' '}</span>` : (esc(ln)||' ')
+  ).join('\n');
+}
+
+function labelCardHTML(f){
+  const l = f.label;
+  return `
+  <div class="label-card" id="labelCard">
+    <div class="lc-head">
+      ${stampHTML(f)}
+      <div>
+        <div style="font-weight:800; font-size:13.5px">N2SF 라벨 <span style="color:var(--ink-soft); font-weight:600">(${esc(Core.LABEL_PATHS[f.format])})</span></div>
+        <div style="margin-top:3px">서명 상태: <span class="sig-ind none" id="sigInd">검증 중…</span></div>
+      </div>
+    </div>
+    <table>
+      <tr><td class="k">등급</td><td><b>${esc(l.grade)}</b>${GRADE_WORD[l.grade]?' · '+GRADE_WORD[l.grade]:''}</td></tr>
+      <tr><td class="k">분류 근거</td><td>${esc(critText(l.basisId))}</td></tr>
+      <tr><td class="k">발급 조직</td><td>🏛 ${esc(Core.orgName(l.issuerOrg))} <span class="mono">(${esc(l.issuerOrg)})</span></td></tr>
+      <tr><td class="k">승인자</td><td>${esc(l.approver)}</td></tr>
+      <tr><td class="k">Action ID</td><td class="mono">${esc(l.actionId)}</td></tr>
+      <tr><td class="k">발급 시각</td><td class="mono">${esc(l.issuedAt.replace('T',' ').slice(0,19))}</td></tr>
+      <tr><td class="k">콘텐츠 해시</td><td class="mono" title="${esc(l.contentHash)}">${Core.shortHex(l.contentHash)}…</td></tr>
+      <tr><td class="k">서명값</td><td class="mono" title="${esc(l.signature)}">${esc(l.signature.slice(0,28))}…</td></tr>
+    </table>
+  </div>`;
+}
+
+function critText(id){
+  const c = Core.criteriaFor(id);
+  return c ? `${c.basis} — ${c.desc}` : id;
+}
+
+async function refreshSigIndicator(f){
+  await Core.updateSigState(f);
+  const el = $('#sigInd');
+  if(!el) return;
+  if(!f.label){ el.className='sig-ind none'; el.textContent='— 없음'; return; }
+  if(f.sigState==='valid'){ el.className='sig-ind ok'; el.textContent='✓ 유효 (서명·해시 실검증 통과)'; }
+  else {
+    const d = f.sigDetail||{};
+    el.className='sig-ind bad';
+    el.textContent = !d.sigOk ? '✗ 서명 불일치 (라벨 필드 변조)' : '✗ 해시 불일치 (본문 변경됨)';
+  }
+}
+
+function toggleLabelCard(){
+  const el = $('#labelCard');
+  if(el) el.classList.toggle('hidden');
+}
+function flashContent(){ flash($('#contentBox')); }
+
+/* 발급 폼 */
+function issueFormHTML(f){
+  if(f.label || f.org!=='kpost') return '';
+  const opts = Core.CRITERIA.map(c=>
+    `<option value="${c.id}" data-grade="${c.grade}">${esc(c.basis)} — ${esc(c.desc)} (${c.grade})</option>`).join('');
+  return `
+  <div id="issueForm">
+    <h3>Signet Label — 라벨 발급</h3>
+    <div class="if-note">등급 분류는 기관의 판단입니다 — 자동 분류 엔진은 제품화 확장 지점</div>
+    <div class="if-row"><label>등급</label>
+      <select id="ifGrade" onchange="onIssueFormChange()">
+        <option value="O">O · 공개</option><option value="S">S · 민감</option><option value="C">C · 기밀</option>
+      </select>
+    </div>
+    <div class="if-row"><label>근거</label>
+      <select id="ifBasis" onchange="onBasisChange()">${opts}</select>
+    </div>
+    <div class="if-row"><label>승인자</label>
+      <input id="ifApprover" value="오주상 계장">
+    </div>
+    <div class="approve-note">⚠ 외부 공개(O) 확정은 인간 승인이 필요합니다 — 승인자를 확인하세요</div>
+    <div class="if-row" style="margin-top:10px; margin-bottom:0">
+      <button id="issueBtn" onclick="doIssueFromForm()">분류 · 서명 · 발급</button>
+    </div>
+  </div>`;
+}
+
+function onBasisChange(){
+  const sel = $('#ifBasis');
+  const grade = sel.selectedOptions[0].dataset.grade;
+  $('#ifGrade').value = grade;
+  onIssueFormChange();
+  highlightCriteria(sel.value, true);
+}
+function onIssueFormChange(){
+  const form = $('#issueForm');
+  if(form) form.classList.toggle('o-grade', $('#ifGrade').value==='O');
+}
+
+async function doIssueFromForm(){
+  const f = Core.fileById(selectedId);
+  if(!f || f.label) return;
+  await doIssue(f.id, $('#ifGrade').value, $('#ifBasis').value, $('#ifApprover').value || '오주상 계장');
+}
+
+async function doIssue(fileId, grade, basisId, approver){
+  const f = Core.fileById(fileId);
+  await Core.issueLabel(f, grade, basisId, approver);
+  f.blockedReason = null;
+  renderXray(); renderFolders(); renderRegistry({ newRow:true });
+  regSwitchAuto('instance');
+  const node = $('#labelNode');
+  if(node) node.classList.add('sprout');
+}
+
+/* 조작 */
+async function doTamperGrade(){
+  const f = Core.fileById(selectedId); if(!f || !f.label) return;
+  Core.tamperGrade(f);
+  await Core.updateSigState(f);
+  renderXray(); renderFolders();
+}
+async function doTamperContent(){
+  const f = Core.fileById(selectedId); if(!f) return;
+  Core.tamperContent(f);
+  await Core.updateSigState(f);
+  editMode = false;
+  renderXray(); renderFolders();
+}
+async function doStrip(){
+  const f = Core.fileById(selectedId); if(!f || !f.label) return;
+  const node = $('#labelNode');
+  if(node && !reduced){ node.classList.add('tearing'); await sleep(560); }
+  Core.stripLabel(f);
+  await Core.updateSigState(f);
+  renderXray(); renderFolders();
+}
+
+function toggleEdit(){
+  editMode = !editMode;
+  renderXray();
+  if(editMode){ const ta = $('#contentEdit'); if(ta){ ta.focus(); } }
+}
+let editTimer = null;
+function onContentEdit(){
+  const f = Core.fileById(selectedId); if(!f) return;
+  Core.setContent(f, $('#contentEdit').value);
+  f.tamperLines = [];
+  clearTimeout(editTimer);
+  editTimer = setTimeout(async ()=>{
+    await Core.updateSigState(f);
+    refreshSigIndicator(f);
+    const h = await Core.sha256Hex(f.contentBytes);
+    const el = $('#curHash'); if(el) el.textContent = Core.shortHex(h)+'…';
+    const ln = $('#labelNode');
+    if(ln) ln.classList.toggle('bad', f.sigState==='invalid');
+    renderFolders();
+  }, 250);
+}
+
+/* ── ③ 게이트 ── */
+function renderGate(){
+  $('#gateVerifier').textContent = '검증 주체: 우정사업본부';
+  const route = $('#gateRoute');
+  route.innerHTML = stage===1
+    ? `<span class="rt">📁 업무망</span><span class="arr">→</span><span class="rt gatept">⛩ 관문 (에이전트)</span><span class="arr">→</span><span class="rt">📁 외부 반출함</span>`
+    : `<span class="rt">📁 기관 반출함</span><span class="arr">→</span><span class="rt gatept">⛩ 관문 (검증: 우정사업본부)</span><span class="arr">→</span><span class="rt">📁 수신함</span>`;
+}
+
+function gateLogEntryHTML(e){
+  if(e.status==='verdict-pass') return `<div class="gl verdict pass">▶ ${esc(e.text)}</div>`;
+  if(e.status==='verdict-block') return `<div class="gl verdict block">▶ ${esc(e.text)}</div>`;
+  const cls = e.status;
+  const dots = '.'.repeat(Math.max(2, 18-e.label.length*2));
+  return `<div class="gl ${cls}"><span class="st">[${esc(e.step)}]</span> ${esc(e.label)} ${dots} <span class="msg">${esc(e.text)}</span></div>`;
+}
+
+async function playLogs(logs){
+  const box = $('#gateLog');
+  box.innerHTML = '';
+  for(const e of logs){
+    box.insertAdjacentHTML('beforeend', gateLogEntryHTML(e));
+    box.scrollTop = box.scrollHeight;
+    if(e.ref) handleLogRef(e.ref);
+    await sleep(reduced ? 30 : 420);
+  }
+}
+
+function handleLogRef(ref){
+  if(ref.type==='criteria'){ regSwitchAuto('criteria'); highlightCriteria(ref.id, false); }
+  else if(ref.type==='registry'){ regSwitchAuto('instance'); highlightRegistryRow(ref.hash); }
+  else if(ref.type==='registry-miss'){ regSwitchAuto('instance'); showRegBanner(`해시 ${Core.shortHex(ref.hash)}… 이력 없음`); }
+}
+
+async function attemptMove(fileId){
+  if(gateBusy) return null;
+  gateBusy = true;
+  selectFile(fileId);
+  renderFolders();
+  const f = Core.fileById(fileId);
+  $('#conclusionCard').style.display = 'none';
+
+  // 관문 체류 칩
+  const stageEl = $('#gateStage');
+  stageEl.innerHTML = `<div class="gate-chip arrive" id="gateChip">${stampSmHTML(f.label ? f.label.grade : 'U').replace('stamp-sm','stamp-sm '+(f.label?'':'g-U'))} ${esc(f.name)}</div>`;
+  await sleep(reduced?30:560);
+  const chip = $('#gateChip');
+  if(chip){ chip.classList.remove('arrive'); chip.classList.add('hold'); }
+
+  const res = await Core.verifyAtGate(f, 'kpost');
+  await playLogs(res.logs);
+
+  if(res.verdict==='PASS'){
+    f.location = destKeyFor();
+    f.blockedReason = null;
+    if(chip){ chip.classList.remove('hold'); chip.classList.add('pass-out'); }
+  } else {
+    f.blockedReason = res.reason;
+    if(chip){ chip.classList.remove('hold'); chip.classList.add('block-back'); }
+  }
+  await sleep(reduced?30:700);
+  stageEl.innerHTML = `<span class="idle-hint">${res.verdict==='PASS' ? '통과 — 파일이 반출함으로 이동했습니다' : '차단 — 파일이 원 폴더로 반송되었습니다'}</span>`;
+  renderFolders(); renderXray();
+  gateBusy = false;
+  return res;
+}
+
+function setConclusion(text){
+  const el = $('#conclusionCard');
+  el.innerHTML = `<b>이 시연이 증명한 것</b>${esc(text)}`;
+  el.style.display = 'block';
+}
+
+/* ── ④ 레지스트리 ── */
+function regSwitch(tab, manual){
+  if(manual) lastManualTab = Date.now();
+  regTab = tab;
+  $('#regTabInstance').classList.toggle('active', tab==='instance');
+  $('#regTabCriteria').classList.toggle('active', tab==='criteria');
+  $('#regTab'+(tab==='instance'?'Instance':'Criteria')).classList.remove('has-dot');
+  renderRegistry();
+}
+function regSwitchAuto(tab){
+  if(Date.now()-lastManualTab < 5000){
+    $('#regTab'+(tab==='instance'?'Instance':'Criteria')).classList.add('has-dot');
+    return;
+  }
+  if(regTab!==tab) regSwitch(tab, false);
+}
+
+function renderRegistry(opts){
+  opts = opts || {};
+  const wrap = $('#regTableWrap');
+  if(regTab==='criteria'){
+    wrap.innerHTML = `
+    <table class="reg">
+      <thead><tr><th>기준 ID</th><th>근거 조항</th><th>설명</th><th>등급</th><th>필수 통제</th></tr></thead>
+      <tbody>${Core.CRITERIA.map(c=>`
+        <tr id="crit-${c.id}">
+          <td class="mono">${c.id}</td><td>${esc(c.basis)}</td><td>${esc(c.desc)}</td>
+          <td>${stampSmHTML(c.grade)}</td>
+          <td class="mono">${c.controls.join(', ')||'—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  } else {
+    wrap.innerHTML = S.registry.length ? `
+    <table class="reg">
+      <thead><tr><th>콘텐츠 해시</th><th>파일명</th><th>등급</th><th>근거</th><th>발급 조직</th><th>승인자</th><th>Action ID</th><th>발급 시각</th></tr></thead>
+      <tbody>${S.registry.map((r,i)=>`
+        <tr data-hash="${r.hash}" class="${opts.newRow && i===0 ? 'row-new':''}">
+          <td class="mono" title="${r.hash}">${Core.shortHex(r.hash)}…<span class="lookup-slot"></span></td>
+          <td>${esc(r.fileName)}</td>
+          <td>${stampSmHTML(r.grade)}</td>
+          <td>${esc(r.basisText)}</td>
+          <td>${esc(Core.orgName(r.issuerOrg))}</td>
+          <td>${esc(r.approver)}</td>
+          <td class="mono">${r.actionId}</td>
+          <td class="mono">${r.time.replace('T',' ').slice(5,19)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="font-size:11px; color:var(--ink-soft); margin-top:6px">append-only — 행은 추가만 가능하며 수정·삭제할 수 없습니다 (발급조직별 분산 원장)</div>`
+    : '<div style="color:var(--u); padding:14px; text-align:center; font-size:12px">발급 이력이 없습니다</div>';
+  }
+}
+
+function highlightCriteria(id, fromForm){
+  regSwitchAuto('criteria');
+  if(regTab!=='criteria') return;
+  const row = $('#crit-'+id);
+  if(row){ row.classList.remove('pulse'); void row.offsetWidth; row.classList.add('pulse'); }
+}
+function highlightRegistryRow(hash){
+  if(regTab!=='instance') return;
+  const row = document.querySelector(`tr[data-hash="${hash}"]`);
+  if(row){
+    row.classList.remove('pulse'); void row.offsetWidth; row.classList.add('pulse');
+    const slot = row.querySelector('.lookup-slot');
+    if(slot){
+      slot.innerHTML = '<span class="lookup-marker">← 조회됨</span>';
+      setTimeout(()=>{ slot.innerHTML=''; }, 3000);
+    }
+    row.scrollIntoView({block:'nearest'});
+  }
+}
+let bannerTimer = null;
+function showRegBanner(text){
+  const b = $('#regBanner');
+  b.textContent = text; b.classList.remove('hidden');
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(()=>b.classList.add('hidden'), 3000);
+}
+
+function renderCriteriaBadge(){
+  const el = $('#criteriaBadge');
+  if(S.criteriaValid){
+    el.textContent = '기준 레지스트리 서명 유효 ✓ (국가 루트)';
+    el.className = 'reg-badge';
+  } else {
+    el.textContent = '기준 레지스트리 서명 검증 실패 ✗';
+    el.className = 'reg-badge bad';
+  }
+  el.title = `서명(앞 24자): ${(S.criteriaSig||'').slice(0,24)}… · 검증 시각: ${(S.criteriaVerifiedAt||'').replace('T',' ').slice(0,19)}`;
+}
+
+/* ── 해설 밴드 ── */
+function renderConcept(){
+  const diagram1 = `
+  <svg width="270" height="70" viewBox="0 0 270 70" fill="none" aria-hidden="true">
+    <rect x="4" y="16" width="58" height="40" rx="4" stroke="#5A6670" stroke-width="1.5"/>
+    <circle cx="48" cy="26" r="10" stroke="#0E7C66" stroke-width="2"/>
+    <text x="48" y="30" font-size="10" fill="#0E7C66" text-anchor="middle" font-weight="700">O</text>
+    <text x="28" y="42" font-size="9" fill="#5A6670">문서+스탬프</text>
+    <path d="M68 36 h28 m0 0 l-6 -4 m6 4 l-6 4" stroke="#8A9199" stroke-width="1.5"/>
+    <rect x="102" y="10" width="52" height="52" rx="4" stroke="#1F2A33" stroke-width="2"/>
+    <text x="128" y="33" font-size="10" fill="#1F2A33" text-anchor="middle" font-weight="700">게이트</text>
+    <text x="128" y="46" font-size="8" fill="#5A6670" text-anchor="middle">서명·해시 검증</text>
+    <path d="M160 26 h28 m0 0 l-6 -4 m6 4 l-6 4" stroke="#0E7C66" stroke-width="2"/>
+    <text x="196" y="30" font-size="10" fill="#0E7C66" font-weight="700">통과</text>
+    <path d="M160 48 h28 m0 0 l-6 -4 m6 4 l-6 4" stroke="#B3362B" stroke-width="2"/>
+    <text x="196" y="52" font-size="10" fill="#B3362B" font-weight="700">차단</text>
+  </svg>`;
+  const diagram2 = `
+  <svg width="300" height="70" viewBox="0 0 300 70" fill="none" aria-hidden="true">
+    <rect x="4" y="24" width="72" height="32" rx="4" stroke="#5A6670" stroke-width="1.5"/>
+    <text x="40" y="43" font-size="9" fill="#1F2A33" text-anchor="middle">A기관 발급·서명</text>
+    <rect x="224" y="24" width="72" height="32" rx="4" stroke="#5A6670" stroke-width="1.5"/>
+    <text x="260" y="43" font-size="9" fill="#1F2A33" text-anchor="middle">B기관 검증</text>
+    <rect x="118" y="4" width="66" height="22" rx="4" stroke="#40566B" stroke-width="1.5"/>
+    <text x="151" y="19" font-size="9" fill="#40566B" text-anchor="middle">국가 루트 CA</text>
+    <path d="M76 32 L118 18" stroke="#8A9199" stroke-width="1.2"/>
+    <path d="M224 32 L184 18" stroke="#8A9199" stroke-width="1.2"/>
+    <rect x="118" y="40" width="66" height="22" rx="4" stroke="#0E7C66" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <text x="151" y="55" font-size="9" fill="#0E7C66" text-anchor="middle">등가 협약表</text>
+    <path d="M80 51 h34" stroke="#0E7C66" stroke-width="1.2"/>
+    <path d="M188 51 h32 m0 0 l-5 -3 m5 3 l-5 3" stroke="#0E7C66" stroke-width="1.2"/>
+  </svg>`;
+
+  if(stage===1){
+    $('#cbTitle').textContent = 'Stage 1 · 티켓 — 조직 내 게이트 통제';
+    $('#cbSub').textContent = '라벨은 탑승권: 게이트가 확인하고 O등급만 통과';
+    $('#conceptBody').innerHTML = `${diagram1}
+      <div class="cb-text">
+        라벨은 문서가 경계를 넘어도 되는지 게이트가 판정하는 근거입니다.
+        라벨과 본문 해시를 묶어 기관 키로 서명하므로, 등급을 바꾸거나 본문을 바꾸면 검증이 깨집니다.
+        라벨이 없는 문서는 기본 차단됩니다.
+        <div class="cb-foot">※ N2SF-IF-7(데이터 유형 식별자 통제) · N2SF-IF-14(보안등급 기반 흐름 통제)의 시각화</div>
+      </div>`;
+  } else {
+    $('#cbTitle').textContent = 'Stage 2 · 여권 — Signet Federation · 기관 간 상호 인정';
+    $('#cbSub').textContent = '등급 통일이 아니라 등가 매핑으로 상호 인정';
+    $('#conceptBody').innerHTML = `${diagram2}
+      <div class="cb-text">
+        기관마다 등급 기준이 달라도 됩니다.
+        검증 기관은 국가 루트로 이어지는 서명 체인과 등가 협약을 확인해 상대 등급을 자기 등급으로 번역합니다.
+        협약이 없는 기관의 라벨은 체인이 유효해도 해석할 수 없어 차단됩니다.
+        <div class="cb-foot">※ 미국 CUI 레지스트리 · NATO 등급 등가표와 같은 원리</div>
+      </div>`;
+  }
+}
+function toggleConcept(){
+  const b = $('#conceptBody');
+  b.classList.toggle('hidden');
+  $('#cbToggle').textContent = b.classList.contains('hidden') ? '펼치기 ▼' : '접기 ▲';
+}
+
+/* ── 전역 동작 ── */
+function selectFile(id){
+  selectedId = id;
+  editMode = false;
+  document.querySelectorAll('.file-card').forEach(el=>el.classList.toggle('selected', el.id==='card-'+id));
+  renderXray();
+}
+
+function switchStage(n){
+  if(gateBusy || scenarioBusy) { if(stage!==n) return; }
+  stage = n;
+  $('#tabStage1').classList.toggle('active', n===1);
+  $('#tabStage2').classList.toggle('active', n===2);
+  const def = n===1 ? 'f1' : 'f5';
+  const cur = Core.fileById(selectedId);
+  const stageOrgs = n===1 ? ['kpost'] : ['ndata','kari'];
+  if(!cur || (n===1 ? cur.org!=='kpost' : !stageOrgs.includes(cur.org))) selectedId = def;
+  renderConcept(); renderGate(); renderFolders(); renderXray();
+  $('#gateStage').innerHTML = '<span class="idle-hint">파일을 선택하고 [관문 통과 시도]를 누르면 이 자리에서 심사가 진행됩니다</span>';
+  $('#gateLog').innerHTML = '<div class="empty">에이전트 콘솔 — 판정 파이프라인 로그가 여기에 출력됩니다</div>';
+  $('#conclusionCard').style.display = 'none';
+}
+
+function flash(el){
+  if(!el) return;
+  el.classList.add('focus-ring');
+  setTimeout(()=>el.classList.remove('focus-ring'), 1600);
+}
+
+async function resetAll(){
+  if(gateBusy || scenarioBusy) return;
+  await Core.initFiles();
+  selectedId = stage===1 ? 'f1' : 'f5';
+  editMode = false;
+  renderAll();
+  $('#gateLog').innerHTML = '<div class="empty">초기화 완료 — 모든 파일·레지스트리가 초기 발급 상태로 복원되었습니다</div>';
+  $('#conclusionCard').style.display = 'none';
+}
+
+function renderAll(){
+  renderOrgs(); renderConcept(); renderGate(); renderFolders(); renderXray(); renderRegistry(); renderCriteriaBadge();
+}
+
+/* ── 시나리오 자동 시연 ── */
+function setScenarioButtons(disabled){
+  document.querySelectorAll('.scn-btn').forEach(b=>b.disabled=disabled);
+}
+
+async function runScenario(n){
+  if(scenarioBusy || gateBusy) return;
+  scenarioBusy = true;
+  setScenarioButtons(true);
+  try{
+    await SCENARIOS[n-1].run();
+    setConclusion(SCENARIOS[n-1].msg);
+  } finally {
+    scenarioBusy = false;
+    setScenarioButtons(false);
+  }
+}
+
+async function prep(stageN, fileId){
+  switchStage(stageN);
+  await Core.restoreFile(fileId);
+  renderFolders(); renderRegistry();
+  selectFile(fileId);
+  flash($('#card-'+fileId));
+  await sleep(reduced?50:1000);
+}
+
+const SCENARIOS = [
+  { title:'정상 발급과 통과',
+    msg:'라벨 없는 문서는 기본 차단되고, 발급·서명된 O 라벨만 관문을 통과한다.',
+    async run(){
+      await prep(1,'f1');
+      await attemptMove('f1');                     // U → BLOCK
+      await sleep(reduced?50:1400);
+      flash($('#issueForm'));
+      await sleep(reduced?50:1000);
+      const g=$('#ifGrade'), b=$('#ifBasis'), a=$('#ifApprover');
+      if(g){ g.value='O'; b.value='OPEN'; a.value='오주상 계장'; onIssueFormChange(); }
+      await sleep(reduced?50:900);
+      await doIssue('f1','O','OPEN','오주상 계장');
+      flash($('#panelRegistry'));
+      await sleep(reduced?50:1400);
+      await attemptMove('f1');                     // PASS
+    }},
+  { title:'라벨 위조',
+    msg:'라벨 필드만 바꿔치기해도 라벨+해시 결합 서명 검증이 즉시 잡아낸다 (무서명 라벨의 한계 봉합).',
+    async run(){
+      await prep(1,'f3');
+      flash(document.querySelector('.tamper-btn'));
+      await sleep(reduced?50:800);
+      await doTamperGrade();                       // S→O
+      flash($('#labelCardBox'));
+      await sleep(reduced?50:1600);
+      await attemptMove('f3');                     // BLOCK
+    }},
+  { title:'본문 변조',
+    msg:'라벨+해시 결합 서명이므로 내용 치환도 잡힌다. 수정된 문서는 재분류 대상이다.',
+    async run(){
+      await prep(1,'f4');
+      await sleep(reduced?50:400);
+      await doTamperContent();
+      flash($('#contentBox'));
+      await sleep(reduced?50:1600);
+      await attemptMove('f4');                     // BLOCK (해시 불일치)
+    }},
+  { title:'라벨 박리와 귀속',
+    msg:'라벨을 지워도 해시는 지울 수 없다 — 인스턴스 레지스트리가 원 분류를 기억하고 귀속시킨다.',
+    async run(){
+      await prep(1,'f2');
+      await sleep(reduced?50:400);
+      await doStrip();
+      await sleep(reduced?50:1400);
+      await attemptMove('f2');                     // BLOCK + 폴백 조회
+    }},
+  { title:'타 기관 라벨 인정',
+    msg:'등급 체계를 통일하지 않아도 등가 협약으로 상호 인정한다 — 라벨은 기관 사이에서 여권이 된다.',
+    async run(){
+      await prep(2,'f5');
+      await attemptMove('f5');                     // PASS (공개→O 번역)
+    }},
+  { title:'협약 미체결 거부',
+    msg:'서명이 진짜여도 등가 협약 없이는 등급을 번역할 수 없다. 상호 인정은 기술 반, 거버넌스 반이다.',
+    async run(){
+      await prep(2,'f6');
+      await attemptMove('f6');                     // BLOCK (협약 미체결)
+    }},
+];
+
+/* ── 부팅 ── */
+(async function boot(){
+  try{
+    await Core.init();
+  }catch(err){
+    $('#bootMsg').innerHTML = 'WebCrypto 초기화 실패: ' + esc(err.message) +
+      '<br>파일이 있는 폴더에서 <span class="mono">python -m http.server</span> 실행 후 <span class="mono">http://localhost:8000</span> 으로 접속하세요.';
+    return;
+  }
+  $('#bootMsg').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  selectedId = 'f1';
+  regSwitch('instance', false);
+  switchStage(1);
+  renderAll();
+})();
+</script>
+</body>
+</html>

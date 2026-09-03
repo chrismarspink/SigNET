@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Signet — N2SF 문서 라벨 시연</title>
+<title>Signet — 문서 라벨 관리</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6" fill="none" stroke="%230E7C66" stroke-width="2.4"/><path d="M9 14 7.5 22l4.5-2.4L16.5 22 15 14" fill="none" stroke="%230E7C66" stroke-width="2.4" stroke-linejoin="round"/></svg>'>
 <style>
 :root{
   --bg:#F7F8F6; --panel:#FFFFFF; --ink:#1F2A33; --ink-soft:#5A6670;
@@ -32,20 +33,224 @@ h1,h2,h3{margin:0; font-weight:700}
 .panel-title .brand{color:var(--ink-soft); font-weight:600}
 .panel-body{padding:12px 14px}
 
-/* ── 헤더 ─────────────────────────────── */
-header.app{
+/* ── 아이콘 ───────────────────────────── */
+.ic{width:15px; height:15px; vertical-align:-2.5px; display:inline-block; flex:0 0 auto}
+.ic.lg{width:18px; height:18px; vertical-align:-4px}
+
+/* ── 앱 바 (제품 크롬) ─────────────────── */
+header.appbar{
   background:var(--panel); border-bottom:1px solid var(--line);
-  padding:10px 20px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  padding:0 16px; display:flex; align-items:center; gap:14px; height:46px;
 }
-.logo{display:flex; align-items:baseline; gap:10px}
-.logo .name{font-size:19px; font-weight:800; letter-spacing:.02em}
-.logo .sub{font-size:13px; color:var(--ink-soft)}
-.stage-tabs{display:flex; gap:6px; margin-left:auto}
+.appbar .mark{display:flex; align-items:center; gap:7px; font-size:16px; font-weight:800; letter-spacing:.02em; color:var(--ink)}
+.appbar .mark .ic{width:20px; height:20px; color:var(--o)}
+.appbar nav{display:flex; gap:2px; height:100%}
+.appbar nav .nv{
+  border:none; background:none; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+  padding:0 11px; height:100%; border-bottom:2px solid transparent; display:flex; align-items:center; gap:5px;
+}
+.appbar nav .nv:hover{color:var(--ink)}
+.appbar nav .nv.on{color:var(--ink); font-weight:700; border-bottom-color:var(--o)}
+.appbar nav .nv.off{color:#B4BBC0; cursor:default; position:relative}
+.appbar nav .nv.off:hover{color:#B4BBC0}
+[data-tip]{position:relative}
+[data-tip]:hover::after{
+  content:attr(data-tip); position:absolute; top:calc(100% + 4px); left:50%; transform:translateX(-50%);
+  background:var(--ink); color:#fff; font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:4px;
+  white-space:nowrap; z-index:60; pointer-events:none;
+}
+.appbar .right{margin-left:auto; display:flex; align-items:center; gap:10px}
+.demo-badge{
+  font-size:10px; font-weight:800; letter-spacing:.06em; color:#7A5B12; background:#FBF3DC;
+  border:1px solid #E8D6A4; border-radius:3px; padding:2px 7px;
+}
+.org-switch{position:relative}
+.org-switch>button{
+  display:flex; align-items:center; gap:6px; border:1px solid var(--line-strong); background:var(--bg);
+  border-radius:4px; font-size:12px; font-weight:700; padding:5px 10px; color:var(--ink);
+}
+.org-switch>button::after{content:""; width:7px; height:7px; border-right:1.5px solid var(--ink-soft); border-bottom:1.5px solid var(--ink-soft); transform:rotate(45deg) translateY(-2px)}
+.drop-menu{
+  position:absolute; top:calc(100% + 5px); right:0; min-width:230px; background:#fff;
+  border:1px solid var(--line-strong); border-radius:6px; box-shadow:0 8px 24px rgba(31,42,51,.16);
+  z-index:70; padding:5px; display:none;
+}
+.drop-menu.open{display:block}
+.drop-menu .dm-item{
+  display:flex; align-items:center; gap:8px; width:100%; text-align:left; border:none; background:none;
+  font-size:12px; padding:7px 9px; border-radius:4px; color:var(--ink);
+}
+.drop-menu .dm-item:hover{background:#F1F3EF}
+.drop-menu .dm-item.off{color:#B4BBC0; cursor:default}
+.drop-menu .dm-item.off:hover{background:none}
+.drop-menu .dm-item .sub{margin-left:auto; font-size:10.5px; color:var(--ink-soft)}
+.drop-menu .dm-head{font-size:10.5px; font-weight:800; color:var(--ink-soft); padding:5px 9px 3px; letter-spacing:.04em}
+.bell-wrap{position:relative}
+.bell-btn{border:none; background:none; padding:5px; color:var(--ink-soft); position:relative; display:flex}
+.bell-btn:hover{color:var(--ink)}
+.bell-btn .bcount{
+  position:absolute; top:-1px; right:-3px; min-width:14px; height:14px; border-radius:7px;
+  background:var(--c); color:#fff; font-size:9px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 3px;
+}
+.bell-menu .bm-row{padding:7px 9px; border-radius:4px; font-size:11.5px; line-height:1.45}
+.bell-menu .bm-row:hover{background:#F1F3EF}
+.bell-menu .bm-row .t{color:var(--ink-soft); font-size:10.5px}
+.avatar{
+  display:flex; align-items:center; gap:7px; font-size:11.5px; font-weight:700; color:var(--ink-soft);
+}
+.avatar .av{
+  width:26px; height:26px; border-radius:50%; background:var(--o); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800;
+}
+.snd-btn{border:none; background:none; padding:5px; color:var(--ink-soft); display:flex}
+.snd-btn.on{color:var(--o)}
+
+/* ── 서브 스트립: 스테이지 탭 + 지표 ────── */
+.substrip{
+  background:var(--panel); border-bottom:1px solid var(--line);
+  padding:7px 16px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.stage-tabs{display:flex; gap:6px}
 .stage-tab{
   border:1px solid var(--line-strong); background:var(--bg); color:var(--ink-soft);
-  border-radius:4px; padding:7px 16px; font-size:13px; font-weight:700;
+  border-radius:4px; padding:6px 14px; font-size:12.5px; font-weight:700;
 }
 .stage-tab.active{background:var(--ink); border-color:var(--ink); color:#fff}
+.metrics{margin-left:auto; display:flex; gap:18px; font-size:11.5px; color:var(--ink-soft)}
+.metrics .m b{font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums; margin-left:5px}
+.metrics .m b.bump{animation:mBump .7s ease-out}
+@keyframes mBump{0%{color:var(--o); transform:scale(1.18)} 100%{transform:scale(1)}}
+
+/* ── 하단 상태바 ───────────────────────── */
+#statusBar{
+  position:fixed; left:0; right:0; bottom:0; height:26px; z-index:50;
+  background:var(--panel); border-top:1px solid var(--line);
+  display:flex; align-items:center; gap:8px; padding:0 16px;
+  font-size:11px; color:var(--ink-soft); font-variant-numeric:tabular-nums;
+}
+#statusBar .live{color:var(--o); font-size:9px}
+#statusBar .sep{color:var(--line-strong)}
+
+/* ── 콜드 오픈 부팅 ─────────────────────── */
+#bootScreen{
+  position:fixed; inset:0; z-index:100; background:#141A1F; color:#C7D0D6;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  transition:opacity .6s ease;
+}
+#bootScreen.dissolve{opacity:0; pointer-events:none}
+#bootSeal{position:relative; width:150px; height:170px; margin-bottom:10px}
+#bootSeal .ring{
+  position:absolute; left:50%; top:0; transform:translate(-50%,-30px); color:#8FA6A0;
+  animation:ringDrop 2.6s cubic-bezier(.5,0,.6,1) .9s forwards;
+}
+#bootSeal .ring svg{width:74px; height:74px}
+#bootSeal .wax{
+  position:absolute; left:50%; top:96px; width:86px; height:86px; transform:translate(-50%,0) scale(.2);
+  border-radius:50%; background:radial-gradient(circle at 40% 35%, #1E5F51, #0E7C66 65%, #0A5D4D);
+  opacity:0; animation:waxPress .8s ease-out 2.9s forwards;
+}
+#bootSeal .stampO{
+  position:absolute; left:50%; top:104px; transform:translate(-50%,0) rotate(-6deg) scale(.7);
+  width:70px; height:70px; border-radius:50%; border:3px solid #EAF4F1; color:#EAF4F1;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; line-height:1.05;
+  opacity:0; animation:stampReveal .7s ease-out 3.5s forwards;
+}
+#bootSeal .stampO .g{font-size:24px}
+#bootSeal .stampO .w{font-size:10px}
+@keyframes ringDrop{
+  0%{transform:translate(-50%,-30px)}
+  55%{transform:translate(-50%,52px)}
+  70%{transform:translate(-50%,46px)}
+  85%{transform:translate(-50%,50px); opacity:1}
+  100%{transform:translate(-50%,50px); opacity:0}
+}
+@keyframes waxPress{to{transform:translate(-50%,0) scale(1); opacity:1}}
+@keyframes stampReveal{from{opacity:0; filter:blur(3px)} to{opacity:1; filter:none; transform:translate(-50%,0) rotate(-6deg) scale(1)}}
+#bootVer{font-size:11px; color:#5F6E78; font-family:ui-monospace,Consolas,monospace; margin-bottom:14px}
+#bootLog{
+  width:430px; max-width:88vw; min-height:132px;
+  font-family:ui-monospace,Consolas,monospace; font-size:12px; line-height:1.75; color:#9DB0BA;
+  white-space:pre; overflow:hidden;
+}
+#bootLog .bl{animation:fadein .3s ease-out}
+#bootLog .bl .okc{color:#37B893}
+#bootSkip{
+  position:fixed; right:22px; bottom:20px; border:1px solid #35424B; background:none; color:#7C8B95;
+  border-radius:4px; font-size:11.5px; padding:5px 12px;
+}
+#bootSkip:hover{color:#C7D0D6; border-color:#5F6E78}
+#flyStamp{position:fixed; z-index:99; transition:all .8s cubic-bezier(.4,0,.3,1); pointer-events:none}
+
+/* ── 압인·진동·클로즈업 (물리 연출) ─────── */
+body.shake{animation:bodyShake .18s ease-out 1}
+@keyframes bodyShake{0%{transform:translate(0,0)}30%{transform:translate(2px,-2px)}60%{transform:translate(-2px,2px)}100%{transform:translate(0,0)}}
+.press-stamp{position:fixed; z-index:80; pointer-events:none; animation:pressDown .5s cubic-bezier(.55,0,.7,1) forwards}
+@keyframes pressDown{
+  0%{transform:translate(-50%,-130px) scale(1.5); opacity:.0}
+  35%{opacity:1}
+  70%{transform:translate(-50%,-50%) scale(1); filter:blur(2px); opacity:.85}
+  100%{transform:translate(-50%,-50%) scale(1); filter:none; opacity:1}
+}
+.file-card.closeup{animation:cardCloseup .32s ease-out 1; z-index:5}
+@keyframes cardCloseup{0%{transform:scale(1)} 45%{transform:scale(1.06); box-shadow:0 6px 22px rgba(179,54,43,.28)} 100%{transform:scale(1)}}
+
+/* ── 토스트 ───────────────────────────── */
+#toastBox{position:fixed; right:16px; bottom:36px; z-index:90; display:flex; flex-direction:column; gap:6px; align-items:flex-end}
+.toast{
+  background:var(--ink); color:#E8ECEA; font-size:11.5px; border-radius:6px; padding:8px 12px;
+  box-shadow:0 6px 18px rgba(31,42,51,.3); animation:toastIn .25s ease-out; display:flex; gap:7px; align-items:center; max-width:340px;
+}
+.toast .ic{color:#9DB0BA}
+@keyframes toastIn{from{transform:translateY(8px); opacity:0} to{transform:none; opacity:1}}
+
+/* ── 도전 모드 ─────────────────────────── */
+#challengeOverlay{
+  position:fixed; inset:0; z-index:85; background:rgba(20,26,31,.55);
+  display:none; align-items:center; justify-content:center;
+}
+#challengeOverlay.open{display:flex}
+#challengeOverlay .co-card{
+  background:#fff; border-radius:8px; padding:22px 26px; width:430px; max-width:90vw;
+  box-shadow:0 14px 40px rgba(20,26,31,.35);
+}
+#challengeOverlay h3{font-size:15px; margin-bottom:8px}
+#challengeOverlay p{font-size:12.5px; color:var(--ink-soft); margin:0 0 16px}
+#challengeBar{
+  position:fixed; left:50%; transform:translateX(-50%); bottom:34px; z-index:84;
+  background:var(--ink); color:#E8ECEA; border-radius:8px; padding:9px 14px;
+  display:none; align-items:center; gap:12px; font-size:12px; box-shadow:0 10px 30px rgba(20,26,31,.4);
+}
+#challengeBar.open{display:flex}
+#challengeBar .hashes{font-family:ui-monospace,Consolas,monospace; font-size:11px; line-height:1.5}
+#challengeBar .hashes .lab{color:#8FA0AA; margin-right:6px}
+#challengeBar .hashes .diff{color:#F0A48D; font-weight:700}
+#challengeBar .hashes .same{color:#37B893}
+#challengeBar button{
+  border:1px solid #4A5860; background:#232D34; color:#E8ECEA; border-radius:4px;
+  font-size:11.5px; font-weight:700; padding:6px 11px;
+}
+#challengeBar button:hover{background:#2C3840}
+#challengeBar button.go{background:var(--o); border-color:var(--o)}
+.btn-primary{
+  background:var(--ink); color:#fff; border:none; border-radius:4px; font-size:12.5px; font-weight:700; padding:8px 16px;
+}
+.btn-plain{
+  background:var(--bg); color:var(--ink); border:1px solid var(--line-strong); border-radius:4px; font-size:12.5px; font-weight:700; padding:8px 16px;
+}
+
+/* ── 커스텀 컨트롤 (기본 브라우저 스타일 제거) ── */
+select{
+  appearance:none; -webkit-appearance:none;
+  background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%235A6670" stroke-width="1.5"/></svg>');
+  background-repeat:no-repeat; background-position:right 8px center; background-size:10px; padding-right:26px !important;
+}
+input,select,textarea{outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--focus) !important; box-shadow:0 0 0 2px #D6E4F2}
+*{scrollbar-width:thin; scrollbar-color:#C4CAC3 transparent}
+::-webkit-scrollbar{width:9px; height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#C4CAC3; border-radius:5px; border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#A9B0A9}
 
 /* ── 해설 밴드 ─────────────────────────── */
 #conceptBand{margin:12px 16px 0; border:1px solid var(--line); border-radius:8px; background:var(--panel)}
@@ -287,13 +492,15 @@ textarea.content-edit{
   font-size:12px; color:var(--ink-soft); background:var(--u-bg); border:1px solid var(--line-strong);
   border-radius:4px; padding:4px 10px; margin-bottom:6px;
 }
-.reg-table-wrap{overflow-x:auto}
-table.reg{width:100%; border-collapse:collapse; font-size:12px}
+.reg-table-wrap{overflow:auto; max-height:280px}
+table.reg{width:100%; border-collapse:separate; border-spacing:0; font-size:11.8px}
 table.reg th{
-  text-align:left; font-size:11px; color:var(--ink-soft); font-weight:700;
+  text-align:left; font-size:10.5px; color:var(--ink-soft); font-weight:700;
   border-bottom:1.5px solid var(--line-strong); padding:5px 8px; white-space:nowrap;
+  position:sticky; top:0; background:#fff; z-index:2;
 }
-table.reg td{border-bottom:1px solid var(--line); padding:5px 8px; vertical-align:middle}
+table.reg td{border-bottom:1px solid var(--line); padding:3.5px 8px; vertical-align:middle}
+table.reg tbody tr:hover>td{background:#F4F6F2}
 table.reg tr.pulse>td{animation:rowPulse 1.2s ease-out 2}
 table.reg tr.row-new>td{animation:rowNew 1.6s ease-out}
 @keyframes rowPulse{0%{background:#FFF3CD} 100%{background:transparent}}
@@ -315,16 +522,10 @@ table.reg tr.row-new>td{animation:rowNew 1.6s ease-out}
 .scn-btn .stg{font-size:9.5px; color:var(--u); font-weight:800; margin-right:4px}
 #resetBtn{margin-left:auto; border-color:#DBA8A1; color:var(--c); background:#FDF7F6}
 
-footer.app{
-  margin:0 16px 20px; padding:12px 4px; color:var(--ink-soft); font-size:12px;
-  border-top:1px solid var(--line); display:flex; flex-direction:column; gap:4px;
-}
-footer.app .narrative{font-size:12.5px; color:var(--ink)}
-footer.app .narrative b{letter-spacing:.03em}
-
 .focus-ring{outline:3px solid var(--focus) !important; outline-offset:2px; border-radius:6px; transition:outline .2s}
 .hidden{display:none !important}
-#bootMsg{padding:60px; text-align:center; color:var(--ink-soft)}
+body{padding-bottom:34px}
+#scenarioBar{margin-bottom:18px}
 
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important; transition:none !important}
@@ -333,19 +534,26 @@ footer.app .narrative b{letter-spacing:.03em}
 </head>
 <body>
 
-<div id="bootMsg">기관 키쌍 생성 및 초기 라벨 서명 중… (WebCrypto)</div>
+<div id="bootScreen">
+  <div id="bootSeal">
+    <span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="6"/><path d="M9 10.5 7.5 2l4.5 2.4L16.5 2 15 10.5"/></svg></span>
+    <span class="wax"></span>
+    <span class="stampO"><span class="g">O</span><span class="w">공개</span></span>
+  </div>
+  <div id="bootVer">Signet 1.4.2 · build 시작</div>
+  <div id="bootLog"></div>
+  <button id="bootSkip" onclick="skipBoot()">건너뛰기 (ESC)</button>
+</div>
 
 <div id="app" class="hidden">
-<header class="app">
-  <div class="logo">
-    <span class="name">Signet</span>
-    <span class="sub">N2SF 문서 라벨 시연 — 티켓과 여권</span>
-  </div>
+<header class="appbar" id="appbar"></header>
+<div class="substrip">
   <div class="stage-tabs">
     <button class="stage-tab" id="tabStage1" onclick="switchStage(1)">Stage 1 · 티켓 (조직 내 게이트)</button>
     <button class="stage-tab" id="tabStage2" onclick="switchStage(2)">Stage 2 · 여권 (기관 간 상호 인정)</button>
   </div>
-</header>
+  <div class="metrics" id="metricsStrip"></div>
+</div>
 
 <section id="conceptBand">
   <div class="cb-head" onclick="toggleConcept()">
@@ -417,14 +625,33 @@ footer.app .narrative b{letter-spacing:.03em}
   <button class="scn-btn" onclick="runScenario(4)"><span class="stg">S1</span>4. 라벨 박리와 귀속</button>
   <button class="scn-btn" onclick="runScenario(5)"><span class="stg">S2</span>5. 타 기관 라벨 인정</button>
   <button class="scn-btn" onclick="runScenario(6)"><span class="stg">S2</span>6. 협약 미체결 거부</button>
+  <button class="scn-btn" id="challengeBtn" onclick="openChallenge()" style="border-color:var(--o); color:var(--o)">도전: 직접 변조해 보십시오</button>
   <button class="scn-btn" id="resetBtn" onclick="resetAll()">처음으로 되돌리기</button>
 </section>
+</div>
 
-<footer class="app">
-  <div class="narrative">“라벨은 스스로 문서를 지키지 않는다 — 인장이 라벨을 보증하고, 관문이 검증하며, 원장이 기억한다. 조직 안에서는 티켓, 조직 사이에서는 여권. <b>Signet.</b>”</div>
-  <div>본 화면은 보여주기 전용 프로토타입입니다. 모든 해시(SHA-256)·서명(ECDSA P-256)·체인 검증은 브라우저 WebCrypto 실연산이며, 페이지를 새로고침하면 키와 서명이 새로 생성됩니다.</div>
-  <div>※ 화면이 동작하지 않는 환경에서는 파일이 있는 폴더에서 <span class="mono">python -m http.server</span> 실행 후 <span class="mono">http://localhost:8000</span> 으로 접속하세요.</div>
-</footer>
+<div id="statusBar"></div>
+<div id="toastBox"></div>
+
+<div id="challengeOverlay">
+  <div class="co-card">
+    <h3>도전 — 직접 변조해 보십시오</h3>
+    <p>본문에 아무 문구나 입력해 보십시오. 1글자만 바뀌어도 관문이 잡아냅니다.<br>
+    O등급 파일의 본문 편집창이 열리고, 입력 즉시 해시가 실시간으로 달라지는 것을 확인할 수 있습니다.</p>
+    <div style="display:flex; gap:8px; justify-content:flex-end">
+      <button class="btn-plain" onclick="closeChallengeOverlay()">닫기</button>
+      <button class="btn-primary" onclick="startChallenge()">시작</button>
+    </div>
+  </div>
+</div>
+<div id="challengeBar">
+  <div class="hashes">
+    <div><span class="lab">발급 시 해시</span><span id="chHashOrig">—</span></div>
+    <div><span class="lab">현재 해시&nbsp;&nbsp;&nbsp;</span><span id="chHashNow" class="same">—</span></div>
+  </div>
+  <button class="go" onclick="challengeMove()">이동 시도</button>
+  <button onclick="challengeRestore()">원상 복구</button>
+  <button onclick="endChallenge()">종료</button>
 </div>
 
 <script>
@@ -549,12 +776,13 @@ function createSignetCore(){
   /* ── 간이 인증서 ── */
   function certBytes(subject, jwk){ return te.encode(subject + '\n' + JSON.stringify(jwk)); }
 
-  async function initOrgs(){
+  async function initOrgs(onKey){
     for(const def of ORG_DEFS){
       const keyPair = await subtle.generateKey(EC, true, ['sign','verify']);
       const jwk = await subtle.exportKey('jwk', keyPair.publicKey);
       const fp = shortHex(await sha256Hex(te.encode(JSON.stringify(jwk))));
       state.orgs[def.id] = { ...def, keyPair, publicKey:keyPair.publicKey, privateKey:keyPair.privateKey, jwk, fp, cert:null };
+      if(onKey) onKey(state.orgs[def.id]);
     }
     const root = state.orgs.root;
     for(const id of ['kpost','ndata','kari']){
@@ -649,11 +877,48 @@ function createSignetCore(){
 
   const registryLookup = hash => state.registry.find(r=>r.hash===hash) || null;
 
+  /* ── 초기 원장 이력 (지난 2주, 전부 로드 시 실서명) ── */
+  const SEED_DOCS = [
+    { name:'우편물류_월간실적_0819.hwpx',  org:'kpost', grade:'O', basisId:'OPEN',  approver:'오주상 계장',   daysAgo:14 },
+    { name:'금융창구_민원처리대장.docx',   org:'kpost', grade:'S', basisId:'PRIV',  approver:'김보라 사무관', daysAgo:13 },
+    { name:'집배원_안전관리_점검표.pdf',   org:'kpost', grade:'S', basisId:'SAFE',  approver:'박정운 과장',   daysAgo:12 },
+    { name:'우체국예금_상품개정안.hwp',    org:'kpost', grade:'S', basisId:'BIZ',   approver:'김보라 사무관', daysAgo:11 },
+    { name:'보안감사_결과보고_요약.hwpx',  org:'kpost', grade:'C', basisId:'LAW',   approver:'서민재 팀장',   daysAgo:10 },
+    { name:'공공데이터_개방목록_v3.pdf',   org:'kpost', grade:'O', basisId:'OPEN',  approver:'오주상 계장',   daysAgo:9 },
+    { name:'전산장비_도입계획_검토.docx',  org:'kpost', grade:'S', basisId:'AUDIT', approver:'박정운 과장',   daysAgo:8 },
+    { name:'통계요청_회신_국데청.hwpx',    org:'ndata', grade:'공개', basisId:'OPEN', approver:'정한결 주무관', daysAgo:8 },
+    { name:'우체국쇼핑_입점심사_명부.hwp', org:'kpost', grade:'S', basisId:'PRIV',  approver:'김보라 사무관', daysAgo:7 },
+    { name:'수사협조_회신문서_0827.pdf',   org:'kpost', grade:'C', basisId:'TRIAL', approver:'서민재 팀장',   daysAgo:6 },
+    { name:'보도참고_요금개편_QA.hwp',     org:'kpost', grade:'O', basisId:'OPEN',  approver:'오주상 계장',   daysAgo:5 },
+    { name:'물류센터_시범국_평가표.hwpx',  org:'kpost', grade:'S', basisId:'AUDIT', approver:'박정운 과장',   daysAgo:4 },
+    { name:'개인정보_파기대장_3분기.docx', org:'kpost', grade:'S', basisId:'PRIV',  approver:'김보라 사무관', daysAgo:3 },
+    { name:'국제특송_협정검토_초안.pdf',   org:'kpost', grade:'C', basisId:'SEC',   approver:'서민재 팀장',   daysAgo:2 },
+    { name:'주간동향_대외배포본.hwpx',     org:'kpost', grade:'O', basisId:'OPEN',  approver:'오주상 계장',   daysAgo:1 },
+  ];
+
+  async function seedLedger(){
+    for(const d of SEED_DOCS){
+      const bytes = te.encode(`${d.name}\n등록 사본 · ${d.org} · ${d.daysAgo}일 전 발급분`);
+      const contentHash = await sha256Hex(bytes);
+      state.actionSeq++;
+      const actionId = 'ACT-2026-' + String(state.actionSeq).padStart(4,'0');
+      const t = new Date(Date.now() - d.daysAgo*86400000 - (d.daysAgo*7919)%36000000);
+      const issuedAt = t.toISOString();
+      const label = { grade:d.grade, gradeDisplay:d.grade, basisId:d.basisId, issuerOrg:d.org,
+        approver:d.approver, actionId, issuedAt, contentHash, signature:null };
+      label.signature = await signAs(d.org, te.encode(canonicalizeLabel(label)));
+      const crit = criteriaFor(d.basisId);
+      state.registry.unshift({ hash:contentHash, fileName:d.name, grade:d.grade, basisId:d.basisId,
+        basisText: crit?crit.basis:'-', issuerOrg:d.org, approver:d.approver, actionId, time:issuedAt });
+    }
+  }
+
   /* ── 파일 초기화 ── */
   async function initFiles(){
     state.registry = [];
     state.actionSeq = 0;
     state.files = [];
+    await seedLedger();
     for(const def of FILE_DEFS){
       const f = makeFile(def);
       state.files.push(f);
@@ -756,10 +1021,19 @@ function createSignetCore(){
           ? '서명 불일치 ✗ (라벨 필드가 서명 이후 변경됨 — 라벨 위조 의심)'
           : '라벨 서명 ✓ / 콘텐츠 해시 불일치 ✗ (본문이 발급 시점과 다름 — 본문 변조 또는 수정, 재분류 대상)' });
       fallbackLookup();
+      if(!fallbackRow && sigOk){
+        const orig = registryLookup(file.label.contentHash);
+        if(orig){
+          fallbackRow = orig;
+          logs.push({ step:'폴백', label:'발급 시점 해시로 재조회', status:'info',
+            text:`라벨 내 해시 ${shortHex(file.label.contentHash)}… → 원 발급: ${orig.grade} (${orig.basisText}, 승인 ${orig.approver}) — 현재 본문은 발급본과 다름`,
+            ref:{ type:'registry', hash:orig.hash } });
+        }
+      }
       logs.push({ step:'5/5', label:'게이트 정책', status:'fail', text:'검증 실패 파일 반출 불가' });
       const reason = !sigOk
         ? (fallbackRow ? `라벨 위조 의심 — 원 분류 ${fallbackRow.grade}로 귀속` : '라벨 위조 의심')
-        : '본문 변조 — 재분류 필요';
+        : (fallbackRow ? `본문 변조 — 원 발급 ${fallbackRow.grade}, 재분류 필요` : '본문 변조 — 재분류 필요');
       logs.push({ step:'▶', label:'판정', status:'verdict-block', text:`차단 (BLOCK) — ${reason}` });
       return { verdict:'BLOCK', reason, logs, fallbackRow };
     }
@@ -796,16 +1070,24 @@ function createSignetCore(){
     return { verdict:'BLOCK', reason:`${finalGrade}등급 반출 불가`, logs, finalGrade };
   }
 
-  async function init(){
-    await initOrgs();
+  async function init(onEvent){
+    const emit = onEvent || (()=>{});
+    await initOrgs(o => emit({ type:'keygen', id:o.id, fp:o.fp }));
     await initCriteriaSig();
+    emit({ type:'criteria' });
     await initFiles();
+    emit({ type:'labels', count: state.registry.length });
+  }
+
+  function nextAuditId(){
+    state.actionSeq++;
+    return 'ACT-2026-' + String(state.actionSeq).padStart(4,'0');
   }
 
   return {
     state, CRITERIA, EQUIVALENCE, LABEL_PATHS, FILE_DEFS,
     init, initFiles, restoreFile, fileById, criteriaFor, orgName,
-    issueLabel, verifyAtGate, updateSigState,
+    issueLabel, verifyAtGate, updateSigState, nextAuditId,
     setContent, tamperGrade, tamperContent, stripLabel,
     canonicalizeLabel, sha256Hex, shortHex, registryLookup, verifyChain,
   };
@@ -835,6 +1117,121 @@ const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 
 const GRADE_WORD = { O:'공개', S:'민감', C:'기밀' };
 const GRADE_CLASS = { 'O':'g-O','S':'g-S','C':'g-C','공개':'g-O','민감':'g-S','기밀':'g-C','일반':'g-O' };
+
+/* ── 자체 아이콘 세트 (단일 스트로크) ── */
+const ICONS = {
+  seal:'<circle cx="12" cy="15" r="6"/><path d="M9 10.5 7.5 2l4.5 2.4L16.5 2 15 10.5"/>',
+  doc:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/>',
+  folder:'<path d="M3 6h6l2 2h10v11H3z"/>',
+  box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+  gate:'<path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-8h6v8"/>',
+  ledger:'<path d="M5 3h13v18H5z"/><path d="M9 7h6M9 11h6M9 15h4"/>',
+  org:'<path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 11h.01M12 11h.01M15 11h.01"/>',
+  key:'<circle cx="8" cy="12" r="3.5"/><path d="M11.5 12H21M18 12v3M21 12v2"/>',
+  pact:'<path d="M9 15l6-6"/><path d="M10 6H8a4 4 0 0 0 0 8h1M14 18h2a4 4 0 0 0 0-8h-1"/>',
+  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 3H4z"/><path d="M10 21a2 2 0 0 0 4 0"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+  check:'<path d="M4 12l5 5L20 7"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  warn:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+  tag:'<path d="M3 12V3h9l9 9-9 9z"/><circle cx="8" cy="8" r="1.6"/>',
+  dash:'<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+  audit:'<circle cx="10" cy="10" r="6"/><path d="M14.5 14.5 21 21"/>',
+  sound:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/>',
+  soundOff:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 10l4 4M20 10l-4 4"/>',
+};
+function icon(name, cls){
+  return `<svg class="ic${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]||''}</svg>`;
+}
+
+/* ── 파일 카드 표시용 메타 (시연 데이터) ── */
+const FILE_META = {
+  f1:{ editor:'한지원 주무관', edited:'오늘 09:12' },
+  f2:{ editor:'박정운 과장',   edited:'어제 17:40' },
+  f3:{ editor:'김보라 사무관', edited:'어제 11:05' },
+  f4:{ editor:'오주상 계장',   edited:'오늘 08:30' },
+  f5:{ editor:'정한결 주무관', edited:'2일 전 15:22' },
+  f6:{ editor:'문서정책연구실', edited:'3일 전 10:48' },
+};
+const fileSizeText = f => {
+  const b = f.contentBytes.length;
+  return b < 1024 ? b + ' B' : (b/1024).toFixed(1) + ' KB';
+};
+
+/* ── 운영 지표 ── */
+const METRICS = { checked:1247, passed:1193, blocked:54, docs:8412 };
+function renderMetrics(bumpKey){
+  const el = $('#metricsStrip');
+  if(!el) return;
+  const M = [['checked','오늘 검증'],['passed','통과'],['blocked','차단'],['docs','등록 문서']];
+  el.innerHTML = M.map(([k,t])=>
+    `<span class="m">${t}<b id="mt-${k}" class="${bumpKey===k?'bump':''}">${METRICS[k].toLocaleString()}</b></span>`).join('');
+}
+function bumpMetric(key){ METRICS[key]++; renderMetrics(key); }
+
+/* ── 사운드 (기본 OFF) ── */
+let soundOn = false;
+function toggleSound(){
+  soundOn = !soundOn;
+  const b = $('#sndBtn');
+  if(b){ b.classList.toggle('on', soundOn); b.innerHTML = icon(soundOn?'sound':'soundOff','lg'); b.dataset.tip = soundOn?'사운드 켬':'사운드 끔'; }
+}
+function playTone(freq, dur, type, gain){
+  if(!soundOn) return;
+  try{
+    const ctx = playTone.ctx || (playTone.ctx = new (window.AudioContext||window.webkitAudioContext)());
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type||'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(gain||.08, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + dur);
+  }catch(e){}
+}
+const sndPress = ()=>{ playTone(120,.16,'sine',.12); playTone(240,.08,'triangle',.05); };
+const sndBlock = ()=>{ playTone(180,.22,'square',.04); };
+
+/* ── 토스트 ── */
+function showToast(text, iconName){
+  const box = $('#toastBox');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `${icon(iconName||'audit')} <span>${esc(text)}</span>`;
+  box.appendChild(el);
+  setTimeout(()=>el.remove(), 2500);
+}
+
+/* ── 알림 벨 ── */
+const bellEvents = [];
+function pushBellEvent(text){
+  bellEvents.unshift({ text, time:new Date().toTimeString().slice(0,8) });
+  if(bellEvents.length > 8) bellEvents.pop();
+  renderBell();
+}
+function renderBell(){
+  const c = $('#bellCount');
+  if(c){ c.textContent = bellEvents.length; c.style.display = bellEvents.length ? 'flex':'none'; }
+  const m = $('#bellMenu');
+  if(m) m.innerHTML = `<div class="dm-head">최근 차단 이벤트</div>` + (bellEvents.length
+    ? bellEvents.map(e=>`<div class="bm-row">${esc(e.text)}<div class="t">${e.time}</div></div>`).join('')
+    : '<div class="bm-row" style="color:var(--u)">기록 없음</div>');
+}
+function toggleBell(ev){
+  ev.stopPropagation();
+  closeMenus('bellMenu');
+  $('#bellMenu').classList.toggle('open');
+}
+function toggleOrgMenu(ev){
+  ev.stopPropagation();
+  closeMenus('orgMenu');
+  $('#orgMenu').classList.toggle('open');
+}
+function closeMenus(except){
+  ['bellMenu','orgMenu'].forEach(id=>{ if(id!==except){ const el=$('#'+id); if(el) el.classList.remove('open'); } });
+}
+document.addEventListener('click', ()=>closeMenus());
 
 /* ── 스탬프 ── */
 function stampHTML(file){
@@ -866,13 +1263,66 @@ function stampSmHTML(grade){
     : `<span class="stamp-sm word ${cls}">${esc(grade)}</span>`;
 }
 
+/* ── 앱 바 · 상태바 ── */
+let buildHash = '0000000';
+function renderAppbar(){
+  const nav = [
+    ['dash','대시보드', null], ['doc','문서', 'doc'], ['gate','관문', 'gate'],
+    ['ledger','원장', 'ledger'], ['fed','연합', 'fed'], ['audit','감사', null], ['gear','설정', null],
+  ];
+  const navHTML = nav.map(([ic, t, act])=> act
+    ? `<button class="nv${act==='doc'?' on':''}" id="nv-${act}" onclick="navGo('${act}')">${t}</button>`
+    : `<button class="nv off" data-tip="이 시연 범위 밖">${t}</button>`).join('');
+  $('#appbar').innerHTML = `
+    <span class="mark">${icon('seal')} Signet</span>
+    <nav>${navHTML}</nav>
+    <div class="right">
+      <span class="demo-badge">시연 테넌트 (DEMO)</span>
+      <div class="org-switch">
+        <button onclick="toggleOrgMenu(event)">${icon('org')} 우정사업본부</button>
+        <div class="drop-menu" id="orgMenu" onclick="event.stopPropagation()">
+          <div class="dm-head">조직 전환</div>
+          <button class="dm-item">${icon('check')} 우정사업본부 <span class="sub">현재 · 검증 주체</span></button>
+          <button class="dm-item off">국가데이터청 <span class="sub">시연 범위 밖</span></button>
+          <button class="dm-item off">한국행정연구원 <span class="sub">시연 범위 밖</span></button>
+        </div>
+      </div>
+      <div class="bell-wrap">
+        <button class="bell-btn" onclick="toggleBell(event)">${icon('bell','lg')}<span class="bcount" id="bellCount">0</span></button>
+        <div class="drop-menu bell-menu" id="bellMenu" onclick="event.stopPropagation()"></div>
+      </div>
+      <button class="snd-btn" id="sndBtn" data-tip="사운드 끔" onclick="toggleSound()">${icon('soundOff','lg')}</button>
+      <span class="avatar"><span class="av">오</span>오주상 · 정보보안팀</span>
+    </div>`;
+  renderBell();
+}
+function navGo(act){
+  if(act==='doc') switchStage(1);
+  else if(act==='fed') switchStage(2);
+  else if(act==='gate') $('#panelGate').scrollIntoView({behavior:'smooth', block:'start'});
+  else if(act==='ledger') $('#panelRegistry').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function syncNav(){
+  const d = $('#nv-doc'), f = $('#nv-fed');
+  if(d) d.classList.toggle('on', stage===1);
+  if(f) f.classList.toggle('on', stage===2);
+}
+function renderStatusBar(){
+  $('#statusBar').innerHTML =
+    `<span class="live">●</span> 관문 연결됨 <span class="sep">·</span> 원장 동기화 <span id="syncTime">${new Date().toTimeString().slice(0,8)}</span> <span class="sep">·</span> Signet 1.4.2 (build ${buildHash})`;
+}
+function touchSync(){
+  const el = $('#syncTime');
+  if(el) el.textContent = new Date().toTimeString().slice(0,8);
+}
+
 /* ── ① 조직 카드 ── */
 function renderOrgs(){
   const box = $('#orgCards');
   const root = S.orgs.root;
   let html = `
     <div class="org-card root">
-      <div class="org-name">🏛 ${root.name} <span class="badge anchor">신뢰 앵커</span></div>
+      <div class="org-name">${icon('shield')} ${root.name} <span class="badge anchor">신뢰 앵커</span></div>
       <div class="org-role">${root.role} · 지문 <span class="mono">${root.fp}</span></div>
     </div>`;
   for(const id of ['kpost','ndata','kari']){
@@ -895,13 +1345,13 @@ function renderOrgs(){
 /* ── 폴더 구성 ── */
 function sourceFolderDefs(){
   return stage===1
-    ? [{ key:'internal', title:'📁 업무망 (우정사업본부 내부)' }]
-    : [{ key:'ndata-out', title:'📁 국가데이터청 반출함' }, { key:'kari-out', title:'📁 한국행정연구원 반출함' }];
+    ? [{ key:'internal', title:`${icon('folder')} 업무망 (우정사업본부 내부)` }]
+    : [{ key:'ndata-out', title:`${icon('folder')} 국가데이터청 반출함` }, { key:'kari-out', title:`${icon('folder')} 한국행정연구원 반출함` }];
 }
 function destFolderDef(){
   return stage===1
-    ? { key:'external', title:'📁 외부 반출함 — 통과한 파일만' }
-    : { key:'kpost-in', title:'📁 우정사업본부 수신함 — 인정된 파일만' };
+    ? { key:'external', title:`${icon('folder')} 외부 반출함 — 통과한 파일만` }
+    : { key:'kpost-in', title:`${icon('folder')} 우정사업본부 수신함 — 인정된 파일만` };
 }
 function destKeyFor(){ return destFolderDef().key; }
 
@@ -911,12 +1361,14 @@ function fileCardHTML(file, movable){
     ? `<div class="blocked-tag">차단됨 · ${esc(file.blockedReason)}</div>` : '';
   const btn = movable
     ? `<button class="move-btn" ${gateBusy?'disabled':''} onclick="event.stopPropagation(); attemptMove('${file.id}')">관문 통과<br>시도 →</button>` : '';
+  const meta = FILE_META[file.id] || {};
   return `
   <div class="file-card${sel}" id="card-${file.id}" onclick="selectFile('${file.id}')">
     ${stampHTML(file)}
     <div class="f-meta">
-      <div class="f-name">${esc(file.name)}</div>
-      <div class="f-sub"><span class="fmt-chip">${file.format.toUpperCase()}</span> ${Core.orgName(file.org)}</div>
+      <div class="f-name">${icon('doc')} ${esc(file.name)}</div>
+      <div class="f-sub"><span class="fmt-chip">${file.format.toUpperCase()}</span> ${fileSizeText(file)} · ${Core.orgName(file.org)}</div>
+      <div class="f-sub">최종 수정 ${esc(meta.editor||'-')} · ${esc(meta.edited||'-')}</div>
       ${blocked}
     </div>
     ${btn}
@@ -951,30 +1403,30 @@ function renderFolders(){
 
 /* ── ② X-ray ── */
 const XRAY_TREES = {
-  hwp: f => ({ root:`📦 ${f.name}  (HWP 5.x — CFB 복합문서)`, nodes:[
+  hwp: f => ({ root:`${f.name}  (HWP 5.x — CFB 복합문서)`, nodes:[
     {t:'├─ FileHeader'}, {t:'├─ DocInfo'},
     {t:'├─ BodyText/Section0', body:true, suffix:'  ← [본문]'},
     {t: f.label?'├─ PrvText':'└─ PrvText'},
-    f.label ? {t:'└─ 🏷 N2SFLabel', labelnode:true, suffix:'  ← 커스텀 스트림'} : null,
+    f.label ? {pre:'└─ ', t:'N2SFLabel', labelnode:true, suffix:'  ← 커스텀 스트림'} : null,
   ]}),
-  hwpx: f => ({ root:`📦 ${f.name}  (OWPML — ZIP+XML)`, nodes:[
+  hwpx: f => ({ root:`${f.name}  (OWPML — ZIP+XML)`, nodes:[
     {t:'├─ mimetype'},
     {t:'├─ Contents/section0.xml', body:true, suffix:'  ← [본문]'},
     {t: f.label?'├─ META-INF/manifest.xml':'└─ META-INF/manifest.xml'},
-    f.label ? {t:'└─ 🏷 META-INF/n2sf-label.xml', labelnode:true, suffix:'  ← 커스텀 파트'} : null,
+    f.label ? {pre:'└─ ', t:'META-INF/n2sf-label.xml', labelnode:true, suffix:'  ← 커스텀 파트'} : null,
   ]}),
-  docx: f => ({ root:`📦 ${f.name}  (OOXML — ZIP+XML)`, nodes:[
+  docx: f => ({ root:`${f.name}  (OOXML — ZIP+XML)`, nodes:[
     {t:'├─ [Content_Types].xml'},
     {t:'├─ word/document.xml', body:true, suffix:'  ← [본문]'},
     {t: f.label?'├─ docProps/core.xml':'└─ docProps/core.xml'},
-    f.label ? {t:'└─ 🏷 customXml/n2sfLabel.xml', labelnode:true, suffix:'  ← 커스텀 파트'} : null,
+    f.label ? {pre:'└─ ', t:'customXml/n2sfLabel.xml', labelnode:true, suffix:'  ← 커스텀 파트'} : null,
   ]}),
-  pdf: f => ({ root:`📦 ${f.name}  (PDF — 오브젝트 구조)`, nodes:[
+  pdf: f => ({ root:`${f.name}  (PDF — 오브젝트 구조)`, nodes:[
     {t:'├─ %PDF-1.7 헤더'},
     {t:'├─ 1 0 obj  (Catalog)'},
     {t:'├─ 4 0 obj  (Page/Contents)', body:true, suffix:'  ← [본문]'},
     {t: f.label?'├─ xref 테이블':'└─ xref 테이블'},
-    f.label ? {t:'└─ 🏷 XMP 메타데이터 (n2sf: 네임스페이스)', labelnode:true} : null,
+    f.label ? {pre:'└─ ', t:'XMP 메타데이터 (n2sf: 네임스페이스)', labelnode:true} : null,
   ]}),
 };
 
@@ -987,14 +1439,14 @@ function renderXray(){
   const nodesHTML = tree.nodes.filter(Boolean).map(n=>{
     if(n.labelnode){
       const bad = f.sigState==='invalid' ? ' bad' : '';
-      return `<div><span class="xt-node labelnode${bad}" id="labelNode" onclick="toggleLabelCard()">${esc(n.t)}</span><span style="color:var(--ink-soft)">${esc(n.suffix||'')}</span></div>`;
+      return `<div>${esc(n.pre||'')}<span class="xt-node labelnode${bad}" id="labelNode" onclick="toggleLabelCard()">${icon('tag')} ${esc(n.t)}</span><span style="color:var(--ink-soft)">${esc(n.suffix||'')}</span></div>`;
     }
     if(n.body) return `<div><span class="xt-node body" onclick="flashContent()">${esc(n.t)}</span><span style="color:var(--ink-soft)">${esc(n.suffix||'')}</span></div>`;
     return `<div><span class="xt-node">${esc(n.t)}</span></div>`;
   }).join('');
 
   const strippedNote = (!f.label && f.strippedLabel)
-    ? `<div style="font-size:11.5px; color:var(--c); margin-top:4px">🏷 라벨 스트림이 제거되었습니다 (박리) — 원 라벨의 콘텐츠 해시는 레지스트리에 남아 있습니다</div>` : '';
+    ? `<div style="font-size:11.5px; color:var(--c); margin-top:4px">${icon('tag')} 라벨 스트림이 제거되었습니다 (박리) — 원 라벨의 콘텐츠 해시는 레지스트리에 남아 있습니다</div>` : '';
 
   box.innerHTML = `
     <div id="xrayHead">
@@ -1004,7 +1456,7 @@ function renderXray(){
         <div style="font-size:11.5px; color:var(--ink-soft)"><span class="fmt-chip">${f.format.toUpperCase()}</span> 소속: ${Core.orgName(f.org)} · 현재 콘텐츠 SHA-256 <span class="mono" id="curHash">계산 중…</span></div>
       </div>
     </div>
-    <div class="xtree"><div class="xt-root">${esc(tree.root)}</div>${nodesHTML}${strippedNote}</div>
+    <div class="xtree"><div class="xt-root">${icon('box')} ${esc(tree.root)}</div>${nodesHTML}${strippedNote}</div>
     <div id="labelCardBox">${f.label ? labelCardHTML(f) : ''}</div>
     <div class="content-box" id="contentBox">
       <div class="cb-bar">
@@ -1049,7 +1501,7 @@ function labelCardHTML(f){
     <table>
       <tr><td class="k">등급</td><td><b>${esc(l.grade)}</b>${GRADE_WORD[l.grade]?' · '+GRADE_WORD[l.grade]:''}</td></tr>
       <tr><td class="k">분류 근거</td><td>${esc(critText(l.basisId))}</td></tr>
-      <tr><td class="k">발급 조직</td><td>🏛 ${esc(Core.orgName(l.issuerOrg))} <span class="mono">(${esc(l.issuerOrg)})</span></td></tr>
+      <tr><td class="k">발급 조직</td><td>${icon('org')} ${esc(Core.orgName(l.issuerOrg))} <span class="mono">(${esc(l.issuerOrg)})</span></td></tr>
       <tr><td class="k">승인자</td><td>${esc(l.approver)}</td></tr>
       <tr><td class="k">Action ID</td><td class="mono">${esc(l.actionId)}</td></tr>
       <tr><td class="k">발급 시각</td><td class="mono">${esc(l.issuedAt.replace('T',' ').slice(0,19))}</td></tr>
@@ -1103,7 +1555,7 @@ function issueFormHTML(f){
     <div class="if-row"><label>승인자</label>
       <input id="ifApprover" value="오주상 계장">
     </div>
-    <div class="approve-note">⚠ 외부 공개(O) 확정은 인간 승인이 필요합니다 — 승인자를 확인하세요</div>
+    <div class="approve-note">${icon('warn')} 외부 공개(O) 확정은 인간 승인이 필요합니다 — 승인자를 확인하세요</div>
     <div class="if-row" style="margin-top:10px; margin-bottom:0">
       <button id="issueBtn" onclick="doIssueFromForm()">분류 · 서명 · 발급</button>
     </div>
@@ -1128,12 +1580,32 @@ async function doIssueFromForm(){
   await doIssue(f.id, $('#ifGrade').value, $('#ifBasis').value, $('#ifApprover').value || '오주상 계장');
 }
 
+async function pressStamp(targetEl, grade){
+  if(reduced || !targetEl) return;
+  const r = targetEl.getBoundingClientRect();
+  const el = document.createElement('span');
+  el.className = 'press-stamp';
+  el.style.left = (r.left + 36) + 'px';
+  el.style.top = (r.top + r.height/2) + 'px';
+  el.innerHTML = `<span class="stamp ${GRADE_CLASS[grade]||''}"><span class="g">${esc(grade)}</span><span class="w">${GRADE_WORD[grade]||''}</span></span>`;
+  document.body.appendChild(el);
+  await sleep(340);
+  document.body.classList.add('shake');
+  sndPress();
+  setTimeout(()=>document.body.classList.remove('shake'), 220);
+  await sleep(220);
+  el.remove();
+}
+
 async function doIssue(fileId, grade, basisId, approver){
   const f = Core.fileById(fileId);
+  await pressStamp($('#card-'+fileId), grade);
   await Core.issueLabel(f, grade, basisId, approver);
   f.blockedReason = null;
+  bumpMetric('docs');
   renderXray(); renderFolders(); renderRegistry({ newRow:true });
   regSwitchAuto('instance');
+  touchSync();
   const node = $('#labelNode');
   if(node) node.classList.add('sprout');
 }
@@ -1180,6 +1652,7 @@ function onContentEdit(){
     const ln = $('#labelNode');
     if(ln) ln.classList.toggle('bad', f.sigState==='invalid');
     renderFolders();
+    updateChallengeHash();
   }, 250);
 }
 
@@ -1188,8 +1661,8 @@ function renderGate(){
   $('#gateVerifier').textContent = '검증 주체: 우정사업본부';
   const route = $('#gateRoute');
   route.innerHTML = stage===1
-    ? `<span class="rt">📁 업무망</span><span class="arr">→</span><span class="rt gatept">⛩ 관문 (에이전트)</span><span class="arr">→</span><span class="rt">📁 외부 반출함</span>`
-    : `<span class="rt">📁 기관 반출함</span><span class="arr">→</span><span class="rt gatept">⛩ 관문 (검증: 우정사업본부)</span><span class="arr">→</span><span class="rt">📁 수신함</span>`;
+    ? `<span class="rt">${icon('folder')} 업무망</span><span class="arr">→</span><span class="rt gatept">${icon('gate')} 관문 (에이전트)</span><span class="arr">→</span><span class="rt">${icon('folder')} 외부 반출함</span>`
+    : `<span class="rt">${icon('folder')} 기관 반출함</span><span class="arr">→</span><span class="rt gatept">${icon('gate')} 관문 (검증: 우정사업본부)</span><span class="arr">→</span><span class="rt">${icon('folder')} 수신함</span>`;
 }
 
 function gateLogEntryHTML(e){
@@ -1204,7 +1677,21 @@ async function playLogs(logs){
   const box = $('#gateLog');
   box.innerHTML = '';
   for(const e of logs){
-    box.insertAdjacentHTML('beforeend', gateLogEntryHTML(e));
+    const typed = !reduced && (e.status==='fail' || e.status==='verdict-block');
+    if(!typed){
+      box.insertAdjacentHTML('beforeend', gateLogEntryHTML(e));
+    } else {
+      box.insertAdjacentHTML('beforeend', gateLogEntryHTML({ ...e, text:'' }));
+      const row = box.lastElementChild;
+      const isVerdict = e.status==='verdict-block';
+      const el = isVerdict ? row : row.querySelector('.msg');
+      const base = isVerdict ? '▶ ' : '';
+      for(let i=1; i<=e.text.length; i++){
+        el.textContent = base + e.text.slice(0,i);
+        box.scrollTop = box.scrollHeight;
+        await sleep(9);
+      }
+    }
     box.scrollTop = box.scrollHeight;
     if(e.ref) handleLogRef(e.ref);
     await sleep(reduced ? 30 : 420);
@@ -1235,17 +1722,29 @@ async function attemptMove(fileId){
   const res = await Core.verifyAtGate(f, 'kpost');
   await playLogs(res.logs);
 
+  bumpMetric('checked');
   if(res.verdict==='PASS'){
     f.location = destKeyFor();
     f.blockedReason = null;
     if(chip){ chip.classList.remove('hold'); chip.classList.add('pass-out'); }
+    bumpMetric('passed');
   } else {
     f.blockedReason = res.reason;
     if(chip){ chip.classList.remove('hold'); chip.classList.add('block-back'); }
+    bumpMetric('blocked');
+    sndBlock();
   }
   await sleep(reduced?30:700);
   stageEl.innerHTML = `<span class="idle-hint">${res.verdict==='PASS' ? '통과 — 파일이 반출함으로 이동했습니다' : '차단 — 파일이 원 폴더로 반송되었습니다'}</span>`;
   renderFolders(); renderXray();
+  if(res.verdict==='BLOCK'){
+    const card = $('#card-'+f.id);
+    if(card && !reduced){ card.classList.add('closeup'); setTimeout(()=>card.classList.remove('closeup'), 380); }
+    const auditId = (f.label && f.label.actionId) || Core.nextAuditId();
+    showToast(`차단 이벤트가 감사 로그에 기록되었습니다 · ${auditId}`);
+    pushBellEvent(`차단 · ${f.name} — ${res.reason}`);
+  }
+  touchSync();
   gateBusy = false;
   return res;
 }
@@ -1423,6 +1922,7 @@ function switchStage(n){
   stage = n;
   $('#tabStage1').classList.toggle('active', n===1);
   $('#tabStage2').classList.toggle('active', n===2);
+  syncNav();
   const def = n===1 ? 'f1' : 'f5';
   const cur = Core.fileById(selectedId);
   const stageOrgs = n===1 ? ['kpost'] : ['ndata','kari'];
@@ -1450,7 +1950,7 @@ async function resetAll(){
 }
 
 function renderAll(){
-  renderOrgs(); renderConcept(); renderGate(); renderFolders(); renderXray(); renderRegistry(); renderCriteriaBadge();
+  renderOrgs(); renderConcept(); renderGate(); renderFolders(); renderXray(); renderRegistry(); renderCriteriaBadge(); renderMetrics();
 }
 
 /* ── 시나리오 자동 시연 ── */
@@ -1541,22 +2041,161 @@ const SCENARIOS = [
     }},
 ];
 
-/* ── 부팅 ── */
-(async function boot(){
+/* ── 도전 모드 ── */
+let challengeActive = false;
+function openChallenge(){
+  if(gateBusy || scenarioBusy) return;
+  $('#challengeOverlay').classList.add('open');
+}
+function closeChallengeOverlay(){ $('#challengeOverlay').classList.remove('open'); }
+async function startChallenge(){
+  closeChallengeOverlay();
+  switchStage(1);
+  await Core.restoreFile('f4');
+  challengeActive = true;
+  renderFolders();
+  editMode = true;
+  selectFile('f4');
+  editMode = true; renderXray();
+  const f = Core.fileById('f4');
+  $('#chHashOrig').textContent = Core.shortHex(f.label.contentHash)+'…';
+  await updateChallengeHash();
+  $('#challengeBar').classList.add('open');
+  const ta = $('#contentEdit');
+  if(ta){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+  flash($('#contentBox'));
+}
+async function updateChallengeHash(){
+  if(!challengeActive) return;
+  const f = Core.fileById('f4');
+  if(!f || !f.label) return;
+  const h = await Core.sha256Hex(f.contentBytes);
+  const el = $('#chHashNow');
+  if(!el) return;
+  el.textContent = Core.shortHex(h)+'…';
+  el.className = h === f.label.contentHash ? 'same' : 'diff';
+}
+async function challengeMove(){
+  if(gateBusy) return;
+  editMode = false;
+  await attemptMove('f4');
+}
+async function challengeRestore(){
+  if(gateBusy) return;
+  await Core.restoreFile('f4');
+  renderFolders(); renderRegistry();
+  editMode = false;
+  selectFile('f4');
+  await updateChallengeHash();
+  showToast('원상 복구 완료 — 파일이 발급 시점 상태로 돌아갔습니다', 'check');
+}
+function endChallenge(){
+  challengeActive = false;
+  $('#challengeBar').classList.remove('open');
+  editMode = false;
+  renderXray();
+}
+
+/* ── 콜드 오픈 부팅 ── */
+let bootQueue = [], bootSkipped = false;
+const fmtFp = fp => fp.slice(0,4)+' '+fp.slice(4,8);
+function bootLineFor(evt){
+  if(evt.type==='keygen'){
+    const nm = evt.id==='root' ? 'root-ca' : evt.id;
+    return `keygen  ${nm} ${'.'.repeat(Math.max(2, 16-nm.length))} ECDSA P-256  ${fmtFp(evt.fp)} <span class="okc">✓</span>`;
+  }
+  if(evt.type==='criteria') return `ledger  criteria-registry  root-ca signature <span class="okc">✓</span>`;
+  if(evt.type==='labels')   return `sign    initial-labels .. ${evt.count}/${evt.count} <span class="okc">✓</span>   precomputed: none`;
+  return '';
+}
+function skipBoot(){ bootSkipped = true; }
+
+async function runBoot(){
+  let revisit = false;
+  try{ revisit = sessionStorage.getItem('signet-boot')==='1'; }catch(e){}
+  const initP = Core.init(evt => bootQueue.push(evt));
+  const logEl = $('#bootLog');
   try{
-    await Core.init();
+    if(revisit || reduced){
+      await initP;
+      if(!revisit){
+        logEl.innerHTML = bootQueue.map(e=>`<div>${bootLineFor(e)}</div>`).join('') + '<div>boot complete</div>';
+        await sleep(600);
+      }
+      await enterApp(true);
+    } else {
+      document.addEventListener('keydown', e => { if(e.key==='Escape') bootSkipped = true; });
+      $('#bootScreen').addEventListener('click', e => { if(e.target.id!=='bootSkip') bootSkipped = true; });
+      const t0 = performance.now();
+      let shown = 0;
+      const total = 6; // keygen 4 + ledger + sign
+      while(shown < total && !bootSkipped){
+        if(bootQueue.length > shown){
+          logEl.insertAdjacentHTML('beforeend', `<div class="bl">${bootLineFor(bootQueue[shown])}</div>`);
+          shown++;
+          await sleep(620);        // 실연산이 빨라도 최소 리듬 유지
+        } else {
+          await sleep(60);         // 실연산 완료 대기
+        }
+      }
+      await initP;
+      if(!bootSkipped){
+        logEl.insertAdjacentHTML('beforeend', '<div class="bl">boot complete</div>');
+        const elapsed = performance.now() - t0;
+        if(elapsed < 6800){
+          const hold = Math.min(1800, 6800 - elapsed);
+          for(let w=0; w<hold && !bootSkipped; w+=100) await sleep(100);
+        }
+      }
+      await enterApp(false);
+    }
   }catch(err){
-    $('#bootMsg').innerHTML = 'WebCrypto 초기화 실패: ' + esc(err.message) +
-      '<br>파일이 있는 폴더에서 <span class="mono">python -m http.server</span> 실행 후 <span class="mono">http://localhost:8000</span> 으로 접속하세요.';
+    logEl.innerHTML = `<div style="color:#E08575">boot failed: ${esc(err.message)}</div>` +
+      `<div style="color:#7C8B95; margin-top:8px">python -m http.server 실행 후 http://localhost:8000 접속</div>`;
     return;
   }
-  $('#bootMsg').classList.add('hidden');
-  $('#app').classList.remove('hidden');
+  try{ sessionStorage.setItem('signet-boot','1'); }catch(e){}
+}
+
+async function enterApp(instant){
+  buildHash = (await Core.sha256Hex(new TextEncoder().encode(String(Date.now()) + Math.random()))).slice(0,7);
+  renderAppbar(); renderStatusBar();
+  pushBellEvent('차단 · 협약 미확인 라벨 반입 시도 (시연 데이터)');
   selectedId = 'f1';
   regSwitch('instance', false);
   switchStage(1);
   renderAll();
-})();
+  $('#app').classList.remove('hidden');
+  const bs = $('#bootScreen');
+  if(instant || bootSkipped || reduced){
+    bs.remove();
+  } else {
+    flyStampToCard();
+    bs.classList.add('dissolve');
+    setTimeout(()=>bs.remove(), 700);
+  }
+}
+
+function flyStampToCard(){
+  const src = document.querySelector('#bootSeal .stampO');
+  const dst = document.querySelector('#card-f4 .stamp');
+  if(!src || !dst) return;
+  const r0 = src.getBoundingClientRect(), r1 = dst.getBoundingClientRect();
+  const el = document.createElement('span');
+  el.id = 'flyStamp';
+  el.style.left = r0.left+'px'; el.style.top = r0.top+'px';
+  el.style.transformOrigin = 'top left';
+  el.innerHTML = `<span class="stamp g-O"><span class="g">O</span><span class="w">공개</span></span>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>{
+    el.style.left = r1.left+'px';
+    el.style.top = r1.top+'px';
+    el.style.transform = `scale(${r1.width/52})`;
+  });
+  setTimeout(()=>el.remove(), 950);
+}
+
+runBoot();
 </script>
 </body>
 </html>

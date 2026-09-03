@@ -1722,33 +1722,40 @@ async function attemptMove(fileId){
   renderFolders();
   const f = Core.fileById(fileId);
   $('#conclusionCard').style.display = 'none';
-
-  // 관문 체류 칩
   const stageEl = $('#gateStage');
-  stageEl.innerHTML = `<div class="gate-chip arrive" id="gateChip">${stampSmHTML(f.label ? f.label.grade : 'U').replace('stamp-sm','stamp-sm '+(f.label?'':'g-U'))} ${esc(f.name)}</div>`;
-  await sleep(reduced?30:560);
-  const chip = $('#gateChip');
-  if(chip){ chip.classList.remove('arrive'); chip.classList.add('hold'); }
+  let res = null;
 
-  const res = await Core.verifyAtGate(f, 'kpost');
-  await playLogs(res.logs);
+  try{
+    // 관문 체류 칩
+    stageEl.innerHTML = `<div class="gate-chip arrive" id="gateChip">${stampSmHTML(f.label ? f.label.grade : 'U').replace('stamp-sm','stamp-sm '+(f.label?'':'g-U'))} ${esc(f.name)}</div>`;
+    await sleep(reduced?30:560);
+    const chip = $('#gateChip');
+    if(chip){ chip.classList.remove('arrive'); chip.classList.add('hold'); }
 
-  bumpMetric('checked');
-  if(res.verdict==='PASS'){
-    f.location = destKeyFor();
-    f.blockedReason = null;
-    if(chip){ chip.classList.remove('hold'); chip.classList.add('pass-out'); }
-    bumpMetric('passed');
-  } else {
-    f.blockedReason = res.reason;
-    if(chip){ chip.classList.remove('hold'); chip.classList.add('block-back'); }
-    bumpMetric('blocked');
-    sndBlock();
+    res = await Core.verifyAtGate(f, 'kpost');
+    await playLogs(res.logs);
+
+    bumpMetric('checked');
+    if(res.verdict==='PASS'){
+      f.location = destKeyFor();
+      f.blockedReason = null;
+      if(chip){ chip.classList.remove('hold'); chip.classList.add('pass-out'); }
+      bumpMetric('passed');
+    } else {
+      f.blockedReason = res.reason;
+      if(chip){ chip.classList.remove('hold'); chip.classList.add('block-back'); }
+      bumpMetric('blocked');
+      sndBlock();
+    }
+    await sleep(reduced?30:700);
+    stageEl.innerHTML = `<span class="idle-hint">${res.verdict==='PASS' ? '통과 — 파일이 반출함으로 이동했습니다' : '차단 — 파일이 원 폴더로 반송되었습니다'}</span>`;
+  } finally {
+    // 폴더를 다시 그리기 전에 해제해야 남은 파일의 [관문 통과 시도]가 다시 활성화된다
+    gateBusy = false;
   }
-  await sleep(reduced?30:700);
-  stageEl.innerHTML = `<span class="idle-hint">${res.verdict==='PASS' ? '통과 — 파일이 반출함으로 이동했습니다' : '차단 — 파일이 원 폴더로 반송되었습니다'}</span>`;
+
   renderFolders(); renderXray();
-  if(res.verdict==='BLOCK'){
+  if(res && res.verdict==='BLOCK'){
     const card = $('#card-'+f.id);
     if(card && !reduced){ card.classList.add('closeup'); setTimeout(()=>card.classList.remove('closeup'), 380); }
     const auditId = (f.label && f.label.actionId) || Core.nextAuditId();
@@ -1756,7 +1763,6 @@ async function attemptMove(fileId){
     pushBellEvent(`차단 · ${f.name} — ${res.reason}`);
   }
   touchSync();
-  gateBusy = false;
   return res;
 }
 

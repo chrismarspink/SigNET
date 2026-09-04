@@ -651,6 +651,32 @@ body{padding-bottom:34px}
 .rel-row label{width:76px; font-size:12px; font-weight:700; flex:0 0 auto}
 .rel-row input{flex:1; font:inherit; font-size:12.5px; padding:6px 9px; border:1px solid var(--line-strong); border-radius:4px}
 
+
+.lc-src{border-top:1px solid var(--line); background:#FBFBFA}
+.lc-src .src-head{
+  display:flex; align-items:center; gap:8px; padding:7px 14px; flex-wrap:wrap;
+  border-bottom:1px solid var(--line);
+}
+.lc-src .src-title{font-size:12px; font-weight:800}
+.lc-src .src-path{font-size:11px; color:var(--ink-soft)}
+.lc-src .src-lang{
+  font-size:9.5px; font-weight:800; letter-spacing:.04em; color:#5A6670;
+  border:1px solid var(--line-strong); border-radius:3px; padding:0 5px; background:#fff;
+}
+.lc-src .src-toggle{
+  margin-left:auto; border:1px solid var(--line-strong); background:#fff; border-radius:4px;
+  font-size:11px; font-weight:700; padding:3px 9px; color:var(--ink);
+}
+.lc-src .src-pre{
+  margin:0; padding:10px 14px; max-height:440px; overflow:auto;
+  font-family:ui-monospace,Consolas,"D2Coding",monospace; font-size:11.2px; line-height:1.6;
+  color:#2A3A44; white-space:pre-wrap; overflow-wrap:anywhere; tab-size:2;
+}
+.lc-src .src-note{
+  font-size:11px; color:var(--ink-soft); padding:6px 14px 9px; border-top:1px dashed var(--line);
+}
+.label-card.pub .lc-src .src-pre{color:#24405C}
+
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important; transition:none !important}
 }
@@ -1261,6 +1287,80 @@ function createSignetCore(){
     if(l.validUntil) bad.push('validUntil');
     if(l.revoker) bad.push('revoker');
     return { ok: bad.length === 0, offenders: bad };
+  }
+
+  /* ── 부착 형태별 라벨 직렬화 (§2 attach) ──
+     화면에 보이는 원본이다. 서명은 이 서식이 아니라 canonical(core) 바이트에 대해 계산된다. */
+  function xesc(v){
+    return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function labelXmlBody(l, indent){
+    const p = indent, L = [];
+    const el = (n, v) => L.push(`${p}  <signet:${n}>${xesc(v)}</signet:${n}>`);
+    if(l.grade != null) el('grade', l.grade);
+    if(l.basis) L.push(`${p}  <signet:basis law="${xesc(l.basis.law)}" article="${xesc(l.basis.article)}" clause="${xesc(l.basis.clause)}" registryId="${xesc(l.basis.registryId)}"/>`);
+    L.push(`${p}  <signet:issuer org="${xesc(l.issuer.org)}"${l.issuer.unit?` unit="${xesc(l.issuer.unit)}"`:''} keyId="${xesc(l.issuer.keyId)}"/>`);
+    if(l.approver) el('approver', l.approver);
+    if(l.actionId) el('actionId', l.actionId);
+    el('issuedAt', l.issuedAt);
+    if(l.validUntil) el('validUntil', l.validUntil);
+    if(l.revoker) L.push(`${p}  <signet:revoker type="${xesc(l.revoker.type)}" ref="${xesc(l.revoker.ref)}"/>`);
+    if(l.handling && l.handling.length)
+      L.push(`${p}  <signet:handling>`,
+        ...l.handling.map(h=>`${p}    <signet:code>${xesc(h)}</signet:code>`),
+        `${p}  </signet:handling>`);
+    el('granularity', l.granularity);
+    el('attach', l.attach);
+    el('trust', l.trust);
+    if(l.releasableTo){
+      const rt = l.releasableTo;
+      const inner = [...(rt.orgs||[]).map(o=>`${p}    <signet:org>${xesc(o)}</signet:org>`),
+                     ...(rt.conditions||[]).map(c=>`${p}    <signet:condition>${xesc(c)}</signet:condition>`)];
+      L.push(inner.length
+        ? `${p}  <signet:releasableTo scope="${xesc(rt.scope)}">\n${inner.join('\n')}\n${p}  </signet:releasableTo>`
+        : `${p}  <signet:releasableTo scope="${xesc(rt.scope)}"/>`);
+    }
+    L.push(`${p}  <signet:content hash="sha256:${xesc(l.content.hash)}"/>`);
+    if(l.lineage && ((l.lineage.parents||[]).length || l.lineage.op))
+      L.push(`${p}  <signet:lineage op="${xesc(l.lineage.op)}">`,
+        ...(l.lineage.parents||[]).map(h=>`${p}    <signet:parent>sha256:${xesc(h)}</signet:parent>`),
+        `${p}  </signet:lineage>`);
+    if(l.releaseId) el('releaseId', l.releaseId);
+    if(l.verifyUrl) el('verifyUrl', l.verifyUrl);
+    L.push(`${p}  <signet:signature alg="${xesc(l.signature.alg)}" over="${xesc(l.signature.over)}">${xesc(l.signature.value)}</signet:signature>`);
+    return L.join('\n');
+  }
+  function serializeLabel(label, format){
+    const path = LABEL_PATHS[format] || LABEL_PATHS.hwpx;
+    if(format === 'txt'){
+      // 사이드카: 파일 안에 부착할 수 없으므로 원장 레코드 자체가 라벨이다
+      const rec = registryLookup(label.content.hash);
+      return { lang:'json', path:'인스턴스 원장 레코드 (사이드카)',
+        text: JSON.stringify({ seq:rec?rec.seq:null, kind:'issue', hash:label.content.hash,
+          labelId:label.id, label }, null, 2) };
+    }
+    if(format === 'pdf'){
+      return { lang:'xmp', path,
+        text: `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+      xmlns:signet="urn:signet:label:2"
+      signet:schema="${xesc(label.schema)}" signet:id="${xesc(label.id)}">
+${labelXmlBody(label, '  ')}
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>` };
+    }
+    const note = format === 'hwp' ? '\n<!-- CFB 커스텀 스트림 Signet/Label 의 페이로드 -->' : '';
+    return { lang:'xml', path,
+      text: `<?xml version="1.0" encoding="UTF-8"?>${note}
+<signet:label xmlns:signet="urn:signet:label:2"
+    schema="${xesc(label.schema)}" id="${xesc(label.id)}">
+${labelXmlBody(label, '')}
+</signet:label>` };
   }
 
   /* ══════════ 원장 (§1.3) ══════════ */
@@ -1894,7 +1994,7 @@ function createSignetCore(){
     state, CRITERIA, HANDLING_CODES, AGGREGATION_RULES, DEFAULTS, AGREEMENTS, TARGETS,
     LABEL_PATHS, STRUCT, FILE_DEFS, GRADE_RANK,
     init, initFiles, restoreFile, fileById, criteriaFor, orgName, handlingDesc, agreement,
-    issueLabel, buildLabel, project, publicSelfCheck, canonicalizeLabel,
+    issueLabel, buildLabel, project, publicSelfCheck, canonicalizeLabel, serializeLabel,
     gate, verifyAtGate, updateSigState, nextAuditId,
     setContent, tamperGrade, tamperContent, stripLabel, expireLabel, resignLabel,
     aggregation, propagate, maxGrade, gradeRank, isExpired, regress,
@@ -2415,7 +2515,32 @@ function labelCardHTML(f){
       <tr><td class="k">콘텐츠 해시</td><td class="mono" title="${esc(l.content.hash)}">${Core.shortHex(l.content.hash)}…</td></tr>
       <tr><td class="k">서명값</td><td class="mono" title="${esc(l.signature.value)}">${esc(l.signature.value.slice(0,28))}… <span style="color:var(--ink-soft)">(${esc(l.signature.alg)})</span></td></tr>
     </table>
+    ${labelSrcHTML(f, l)}
   </div>`;
+}
+
+/* 부착된 라벨의 원본 직렬화 */
+let showLabelSrc = true;
+function toggleLabelSrc(ev){
+  ev.stopPropagation();
+  showLabelSrc = !showLabelSrc;
+  const box = $('#labelSrc'), btn = $('#labelSrcToggle');
+  if(box) box.classList.toggle('hidden', !showLabelSrc);
+  if(btn) btn.textContent = showLabelSrc ? '접기 ▲' : '펼치기 ▼';
+}
+function labelSrcHTML(f, label){
+  const s = Core.serializeLabel(label, f.format);
+  return `
+    <div class="lc-src">
+      <div class="src-head">
+        <span class="src-title">라벨 원본</span>
+        <span class="src-path mono">${esc(s.path)}</span>
+        <span class="src-lang">${esc(s.lang.toUpperCase())}</span>
+        <button class="src-toggle" id="labelSrcToggle" onclick="toggleLabelSrc(event)">${showLabelSrc?'접기 ▲':'펼치기 ▼'}</button>
+      </div>
+      <pre class="src-pre${showLabelSrc?'':' hidden'}" id="labelSrc">${esc(s.text)}</pre>
+      <div class="src-note">서명은 이 서식이 아니라 <span class="mono">canonical(core)</span> 바이트에 대해 계산됩니다 — 들여쓰기·속성 순서가 달라져도 검증 결과는 같습니다.</div>
+    </div>`;
 }
 
 function publicLabelCardHTML(f){
@@ -2439,6 +2564,7 @@ function publicLabelCardHTML(f){
       <tr><td class="k">검증 URL</td><td class="mono">${esc(p.verifyUrl)}</td></tr>
       <tr><td class="k">반출 식별자</td><td class="mono">${esc(p.releaseId||'-')} <span style="color:var(--ink-soft)">(수신자는 원장에서만 역해석)</span></td></tr>
     </table>
+    ${labelSrcHTML(f, p)}
     <div class="selfcheck ${chk.ok?'ok':'bad'}">
       ${icon(chk.ok?'check':'warn')} ${chk.ok
         ? '내부 필드 없음 ✓ — grade · basis · approver · unit · actionId · handling · lineage · releasableTo 부재 (자체 검사 실연산)'
